@@ -1,7 +1,8 @@
-package com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries
+package com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.offline
 
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Recipe
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.daos.RecipeDao
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.interfaceRepositaries.RecipeRepositary
 import kotlinx.coroutines.flow.Flow
 
 class OfflineRecipeRepositary(private val recipeDao:RecipeDao) : RecipeRepositary {

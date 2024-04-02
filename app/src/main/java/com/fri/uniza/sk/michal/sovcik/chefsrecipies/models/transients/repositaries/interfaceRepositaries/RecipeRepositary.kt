@@ -1,4 +1,4 @@
-package com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries
+package com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.interfaceRepositaries
 
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Recipe
 import kotlinx.coroutines.flow.Flow
@@ -14,7 +14,12 @@ interface RecipeRepositary {
          * Retrieve an Recipe from that matches with the [name].
          */
         fun getRecipeStream(name: String): Flow<Recipe?>
-/**
+
+
+
+
+
+        /**
          * Retrieve an Recipe from  that matches with the [id].
          */
         fun getRecipeStream(id: Int): Flow<Recipe?>
@@ -33,5 +38,6 @@ interface RecipeRepositary {
          * Update recipe in the data source
          */
         suspend fun updateRecipe(recipe: Recipe)
+
 
 }

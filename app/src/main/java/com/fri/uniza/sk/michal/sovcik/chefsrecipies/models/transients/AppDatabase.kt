@@ -5,10 +5,19 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Ingredient
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Instruction
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Recipe
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.daos.RecipeDao
 
-@Database(entities = [Recipe::class,Ingredient::class], version = 1, exportSchema = false)
+@Database(entities =
+[
+    Recipe::class,
+    Ingredient::class,
+    Instruction::class
+],
+    version = 1,
+    exportSchema = false
+)
 abstract class AppDatabase : RoomDatabase(){
     abstract fun recipeDao(): RecipeDao
     companion object {

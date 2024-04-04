@@ -1,6 +1,7 @@
 package com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent
 
 import android.media.Rating
+import android.net.Uri
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.Index
@@ -11,11 +12,12 @@ import androidx.room.Relation
 data class Recipe(
     @PrimaryKey(autoGenerate = true)
     val id:Int ,
-    @androidx.room.ColumnInfo()
     val name:String,
     val time:Int,
     val portions:Int,
-    val rating: Float
+    val rating: Float,
+    val autor: String,
+    val picPath: Uri
     ){
 
 }
@@ -61,7 +63,8 @@ data class Instruction(
     val id:Int,
     val orderNum:Int,
     val text:String,
-    val recipeId: Int
+    val recipeId: Int,
+    val imgPath:Uri?
 )
 data class InstructionsOfRecipe(
     @Embedded val recipe: Recipe,

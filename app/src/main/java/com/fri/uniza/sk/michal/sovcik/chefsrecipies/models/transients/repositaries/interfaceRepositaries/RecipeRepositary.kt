@@ -1,5 +1,6 @@
 package com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.interfaceRepositaries
 
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.DishType
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Recipe
 import kotlinx.coroutines.flow.Flow
 
@@ -17,7 +18,7 @@ interface RecipeRepositary {
 
 
 
-
+        fun getRecipeOfType(dishType: DishType): Flow<List<Recipe>>
 
         /**
          * Retrieve an Recipe from  that matches with the [id].

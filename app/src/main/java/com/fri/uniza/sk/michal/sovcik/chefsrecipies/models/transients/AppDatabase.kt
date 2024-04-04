@@ -9,12 +9,7 @@ import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Instructio
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Recipe
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.daos.RecipeDao
 
-@Database(entities =
-[
-    Recipe::class,
-    Ingredient::class,
-    Instruction::class
-],
+@Database(entities = [Recipe::class, Ingredient::class, Instruction::class],
     version = 1,
     exportSchema = false
 )

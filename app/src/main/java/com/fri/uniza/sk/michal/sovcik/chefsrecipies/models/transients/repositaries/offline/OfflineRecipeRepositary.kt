@@ -1,5 +1,6 @@
 package com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.offline
 
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.DishType
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Recipe
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.daos.RecipeDao
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.interfaceRepositaries.RecipeRepositary
@@ -16,6 +17,10 @@ class OfflineRecipeRepositary(private val recipeDao:RecipeDao) : RecipeRepositar
 
     override fun getRecipeStream(id: Int): Flow<Recipe?> {
         return recipeDao.getRecipe(id)
+    }
+
+    override fun getRecipeOfType(dishType: DishType): Flow<List<Recipe>> {
+        return recipeDao.getAllRecipies(dishType)
     }
 
     override suspend fun insertRecipe(recipe: Recipe) {

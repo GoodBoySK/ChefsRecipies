@@ -8,16 +8,25 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.Relation
 
+
+enum class DishType{
+    MainDish,
+    Breakfast,
+    Dezert,
+    Soup
+}
+
 @Entity(indices = [Index(value = ["name"], unique = true)])
 data class Recipe(
     @PrimaryKey(autoGenerate = true)
     val id:Int ,
     val name:String,
+    val dishType: DishType,
     val time:Int,
     val portions:Int,
     val rating: Float,
     val autor: String,
-    val picPath: Uri
+    val picPath: String
     ){
 
 }
@@ -64,7 +73,7 @@ data class Instruction(
     val orderNum:Int,
     val text:String,
     val recipeId: Int,
-    val imgPath:Uri?
+    val imgPath:String?
 )
 data class InstructionsOfRecipe(
     @Embedded val recipe: Recipe,

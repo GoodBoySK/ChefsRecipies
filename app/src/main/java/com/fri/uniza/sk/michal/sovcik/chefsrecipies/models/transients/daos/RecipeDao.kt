@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.DishType
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Recipe
 import kotlinx.coroutines.flow.Flow
 
@@ -28,4 +29,6 @@ interface RecipeDao {
     @Query("SELECT * from recipe ORDER BY name ASC")
     fun getAllRecipies(): Flow<List<Recipe>>
 
+    @Query("SELECT * from recipe WHERE dishType = :dishType ORDER BY name ASC")
+    fun getAllRecipies(dishType: DishType): Flow<List<Recipe>>
 }

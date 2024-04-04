@@ -14,6 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.DishType
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Recipe
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.theme.ChefsRecipiesTheme
 
@@ -28,7 +29,7 @@ fun RecipeCard(recipe: Recipe, modifier: Modifier, onClick: () -> Unit,) {
     ){
        // Image(painter = , contentDescription = )
         Column {
-            AsyncImage(model = recipe.picPath, contentDescription = "RecipePicture", modifier = Modifier.weight(1f))
+            AsyncImage(model = Uri.parse(recipe.picPath), contentDescription = "RecipePicture", modifier = Modifier.weight(1f))
             Text(text = recipe.name, fontSize = 20.sp)
             Text(text = recipe.autor, fontStyle = FontStyle.Italic)
         }
@@ -40,6 +41,6 @@ fun RecipeCard(recipe: Recipe, modifier: Modifier, onClick: () -> Unit,) {
 @Composable
 private fun CardPreview() {
     ChefsRecipiesTheme {
-        RecipeCard(Recipe(1,"American Cookies",30,15,4.25f,"Michalito", Uri.parse("")), Modifier,{})
+        RecipeCard(Recipe(1,"American Cookies",DishType.MainDish,30,15,4.25f,"Michalito", ""), Modifier,{})
     }
 }

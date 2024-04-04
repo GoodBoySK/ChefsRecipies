@@ -53,6 +53,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Recipe
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.AppDatabase
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.Views
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.theme.ChefsRecipiesTheme
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.views.HomeView
@@ -64,6 +65,7 @@ import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.views.UserInfoView
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val db = AppDatabase.getDatabase(applicationContext)
         setContent {
             ChefsRecipiesTheme {
                 // A surface container using the 'background' color from the theme

@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 
 class OfflineRecipeRepositary(private val recipeDao:RecipeDao) : RecipeRepositary {
     override fun getAllRecipiesStream(): Flow<List<Recipe>> {
-        return recipeDao.getAllRecipies();
+        return recipeDao.getAllRecipies()
     }
 
     override fun getRecipeStream(name: String): Flow<Recipe?> {

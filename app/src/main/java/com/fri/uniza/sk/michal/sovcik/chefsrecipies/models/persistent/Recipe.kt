@@ -1,7 +1,5 @@
 package com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent
 
-import android.media.Rating
-import android.net.Uri
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.Index
@@ -26,7 +24,7 @@ data class Recipe(
     val portions:Int,
     val rating: Float,
     val autor: String,
-    val picPath: String
+    val picPath: String?
     ){
 
 }

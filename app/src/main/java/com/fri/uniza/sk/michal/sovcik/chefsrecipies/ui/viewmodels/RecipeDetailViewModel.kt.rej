@@ -1,0 +1,7 @@
+diff a/app/src/main/java/com/fri/uniza/sk/michal/sovcik/chefsrecipies/ui/viewmodels/RecipeDetailViewModel.kt b/app/src/main/java/com/fri/uniza/sk/michal/sovcik/chefsrecipies/ui/viewmodels/RecipeDetailViewModel.kt	(rejected hunks)
+@@ -0,0 +1,4 @@
++package com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.viewmodels
++
++class RecipeDetailViewModel {
++}
+\ No newline at end of file

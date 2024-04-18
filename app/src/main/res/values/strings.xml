@@ -4,4 +4,5 @@
     <string name="soup">Soup</string>
     <string name="maindish">MainDish</string>
     <string name="breakfast">BreakFast</string>
+    <string name="recipenameplaceholder">RecipeName</string>
 </resources>

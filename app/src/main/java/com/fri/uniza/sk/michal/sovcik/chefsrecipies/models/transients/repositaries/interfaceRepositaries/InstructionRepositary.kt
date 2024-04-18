@@ -15,5 +15,5 @@ interface InstructionRepositary {
     suspend fun insert(item: Instruction)
     suspend fun update(item: Instruction)
     suspend fun delete(item: Instruction)
-    fun getInstructions(recipeId: Int) : Flow<List<IngredientsOfRecipe>>
+    fun getInstructions(recipeId: Int) : Flow<List<Instruction>>
 }

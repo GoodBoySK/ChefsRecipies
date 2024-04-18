@@ -22,6 +22,6 @@ interface InstructionDao {
     @Delete
     suspend fun delete(item: Instruction)
     @Transaction
-    @Query("SELECT * FROM Recipe WHERE id = :recipeId")
-    fun getInstructions(recipeId: Int) : Flow<List<IngredientsOfRecipe>>
+    @Query("SELECT * FROM Instruction WHERE recipeId = :recipeId")
+    fun getInstructions(recipeId: Int) : Flow<List<Instruction>>
 }

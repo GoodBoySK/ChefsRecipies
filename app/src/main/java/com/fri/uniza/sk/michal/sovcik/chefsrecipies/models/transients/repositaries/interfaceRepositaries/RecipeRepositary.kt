@@ -2,6 +2,7 @@ package com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositar
 
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.DishType
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Recipe
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Tag
 import kotlinx.coroutines.flow.Flow
 
 //This is teoreticly unnecesary for my version but we can asume that we can potentially move data to online server than this becomes important
@@ -11,10 +12,15 @@ interface RecipeRepositary {
          */
         fun getAllRecipiesStream(): Flow<List<Recipe>>
 
+
+
+        fun getAllTags(id: Long) : List<Tag>
+
+
         /**
          * Retrieve an Recipe from that matches with the [name].
          */
-        fun getRecipeStream(name: String): Flow<Recipe?>
+        fun getRecipe(name: String): Recipe?
 
 
 
@@ -23,12 +29,12 @@ interface RecipeRepositary {
         /**
          * Retrieve an Recipe from  that matches with the [id].
          */
-        fun getRecipeStream(id: Int): Flow<Recipe?>
+        fun getRecipe(id: Long): Recipe?
 
         /**
          * Insert recipe in the data source
          */
-        suspend fun insertRecipe(recipe: Recipe)
+        suspend fun insertRecipe(recipe: Recipe) : Long
 
         /**
          * Delete recipe from the data source
@@ -39,6 +45,20 @@ interface RecipeRepositary {
          * Update recipe in the data source
          */
         suspend fun updateRecipe(recipe: Recipe)
+
+        /**
+         * Insert recipe in the data source
+         */
+        suspend fun insertTag(tag: Tag)
+
+        /**
+         * Delete recipe from the data source
+         */
+        suspend fun deleteTag(tag: Tag)
+
+        /**
+         * Update recipe in the data source
+         */
 
 
 }

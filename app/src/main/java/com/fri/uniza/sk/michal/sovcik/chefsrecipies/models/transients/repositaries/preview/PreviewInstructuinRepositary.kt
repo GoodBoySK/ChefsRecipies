@@ -10,19 +10,20 @@ import kotlinx.coroutines.flow.flowOf
 class PreviewInstructuinRepositary : InstructionRepositary {
     private val list:MutableList<Instruction> = mutableListOf()
 
-    override suspend fun insert(item: Instruction) {
+    override suspend fun insert(item: Instruction):Long {
         list.add(item)
+        return item.id
     }
 
     override suspend fun update(item: Instruction) {
-        list.set(list.indexOf(list.first () {  it.id == item.id }),item)
+        list.set(list.indexOf(list.first {  it.id == item.id }),item)
     }
 
     override suspend fun delete(item: Instruction) {
         list.remove(item)
     }
 
-    override fun getInstructions(recipeId: Int): Flow<List<Instruction>> {
-        return flowOf(list.filter { it.recipeId == recipeId });
+    override fun getInstructions(recipeId: Long): List<Instruction> {
+        return list.filter { it.recipeId == recipeId }
     }
 }

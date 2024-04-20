@@ -56,6 +56,8 @@ import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.DishType
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Recipe
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.AppDatabase
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.Views
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.offline.OfflineIngredinetRepositary
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.offline.OfflineInstructionRepositary
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.offline.OfflineRecipeRepositary
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.theme.ChefsRecipiesTheme
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.viewmodels.HomeViewModel
@@ -67,13 +69,14 @@ import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.views.ImportView
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.views.RecipeDetailView
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.views.SearchView
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.views.UserInfoView
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val db = AppDatabase.getDatabase(applicationContext)
 
         setContent {
             ChefsRecipiesTheme {
@@ -88,9 +91,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Navigation() {
     val navControler = rememberNavController()
-    val primaryColor = MaterialTheme.colorScheme.primary;
-    val db = AppDatabase.getDatabase(LocalContext.current)
-    //this is temporary code TODO delete
+    val primaryColor = MaterialTheme.colorScheme.primary
 
     Column (modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Bottom){
         NavHost(navController = navControler,
@@ -99,17 +100,17 @@ fun Navigation() {
                 .fillMaxWidth()
                 .weight(1f)) {
             composable(route = Views.HOME.name) {
-                val context = LocalContext;
+                val context = LocalContext
                 val viewModel =  viewModel<HomeViewModel>(factory = HomeViewModelFactory(
                     OfflineRecipeRepositary(
-                    AppDatabase.getDatabase(
-                LocalContext.current).recipeDao())
+                        AppDatabase.getDatabase(
+                            LocalContext.current).recipeDao(),AppDatabase.getDatabase(LocalContext.current).tagDao())
                 )
                 )
                 HomeView(state =  viewModel.recipesFilter.collectAsState())
             }
             composable(route = Views.SEARCH.name) {
-                val context = LocalContext;
+                val context = LocalContext
                 SearchView()
             }
             composable(route = Views.RECIPEDETAIL.name + "/{recipeId}", arguments = listOf(
@@ -117,21 +118,24 @@ fun Navigation() {
                     type = NavType.IntType
                     nullable = false
                 })) {
-                val context = LocalContext;
-
+                val context = LocalContext
+                val offlineRecipeRepo = OfflineRecipeRepositary(AppDatabase.getDatabase(
+                    LocalContext.current).recipeDao(),AppDatabase.getDatabase(LocalContext.current).tagDao())
+                val offlineInstructionRepo = OfflineInstructionRepositary(AppDatabase.getDatabase(
+                    LocalContext.current).instructionDao())
+                val offlineIngredientRepo = OfflineIngredinetRepositary(AppDatabase.getDatabase(
+                    LocalContext.current).ingredientDao())
                 val viewModel = viewModel<RecipeDetailViewModel>(factory = RecipeViewModelFactory(
-                    OfflineRecipeRepositary(AppDatabase.getDatabase(
-                        LocalContext.current).recipeDao())
-                ))
+                    offlineRecipeRepo,offlineIngredientRepo,offlineInstructionRepo,navControler,it.arguments?.getInt("recipeId") ?: -1))
                 RecipeDetailView(
-                    viewModel.getRecipe(it.arguments?.getInt("recipeId") ?: -1).collectAsState(initial = null).value ?: throw Exception())
+                     viewModel = viewModel)
             }
             composable(route = Views.IMPORT.name) {
-                val context = LocalContext;
+                val context = LocalContext
                 ImportView()
             }
             composable(route = Views.USERINFO.name) {
-                val context = LocalContext;
+                val context = LocalContext
                 UserInfoView()
             }
         }
@@ -143,7 +147,10 @@ fun Navigation() {
             NavigationBarItem(selected = false, onClick = { navControler.navigate(Views.HOME.name) }, icon = { Icon(Icons.Outlined.Home, contentDescription = "home") },modifier = Modifier.fillMaxSize())
             NavigationBarItem(selected = false, onClick = { navControler.navigate(Views.SEARCH.name) }, icon = { Icon(Icons.Outlined.Search, contentDescription = "search")})
                 Button(
-                    onClick = {},
+                    onClick = {
+
+                        navControler.navigate(Views.RECIPEDETAIL.name + "/-1")
+                              },
                     shape = CircleShape,
                     modifier = Modifier
                         .wrapContentSize(unbounded = true, align = Alignment.TopCenter)

@@ -44,7 +44,7 @@ class HomeViewModel(val recipeRepositary: RecipeRepositary) : ViewModel() {
 
     fun getAllRecipeOfType(dishType: DishType): Flow<List<Recipe>> {
         val recipies = recipeRepositary.getRecipeOfType(dishType)
-        return recipies;
+        return recipies
     }
 
 }

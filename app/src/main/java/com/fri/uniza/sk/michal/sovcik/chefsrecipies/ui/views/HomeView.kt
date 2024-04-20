@@ -16,7 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.material3.*;
+import androidx.compose.material3.*
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -63,7 +63,7 @@ fun HomeView(modifier: Modifier = Modifier,
 )
 {
     val colorSchee = MaterialTheme.colorScheme
-    val config = LocalConfiguration.current;
+    val config = LocalConfiguration.current
 
     android.graphics.Color().plus(android.graphics.Color.valueOf(0f,0f,0f,-0.5f))
 
@@ -71,7 +71,6 @@ fun HomeView(modifier: Modifier = Modifier,
     Box(modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             drawCircle(colorSchee.primary.copy(alpha = 0.8f),220.dp.value, Offset(50f,250f))
-            val l = config.screenWidthDp.dp
             drawCircle(colorSchee.primary.copy(alpha = 0.8f),220.dp.value, Offset(250f,100f))
             val polygon = RoundedPolygon(radius = 300.dp.value, numVertices = 4, centerX = size.width + 10.dp.value, centerY = 180.dp.value)
 
@@ -84,8 +83,7 @@ fun HomeView(modifier: Modifier = Modifier,
             }
 
         }
-        Column (){
-            val textModifier = Modifier
+        Column {
             IntroHome(modifier = modifier)
             val modifierReusable = modifier.padding(top = 16.dp, end = 16.dp)
             val categories = listOf(
@@ -94,7 +92,7 @@ fun HomeView(modifier: Modifier = Modifier,
                 Pair(state.value.dezerRecipes,R.string.dezert),
                 Pair(state.value.breakfastRecipes,R.string.breakfast))
 
-            categories.forEach (){pair->
+            categories.forEach { pair->
                 Text(text = stringResource(pair.second), style = MaterialTheme.typography.titleLarge, modifier = Modifier)
                 LazyRow (modifierReusable){
                     items(pair.first){

@@ -1,5 +1,6 @@
 package com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.daos
 
+import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -10,15 +11,16 @@ import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Ingredient
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.InstructionsOfRecipe
 import kotlinx.coroutines.flow.Flow
 
+@Dao
 interface IngredientDao {
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insert(item: Ingredient)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(item: Ingredient) : Long
     @Update
     suspend fun update(item: Ingredient)
     @Delete
     suspend fun delete(item: Ingredient)
     @Transaction
     @Query("SELECT * FROM Ingredient WHERE recipeId = :recipeId")
-    fun getIngrendience(recipeId: Int) : Flow<List<Ingredient>>
+    fun getIngrendience(recipeId: Long) : List<Ingredient>
 
 }

@@ -13,9 +13,9 @@ import kotlinx.coroutines.flow.Flow
 interface IngredientRepositary
 {
 
-    suspend fun insert(item: Ingredient)
+    suspend fun insert(item: Ingredient) : Long
     suspend fun update(item: Ingredient)
     suspend fun delete(item: Ingredient)
-    fun getIngredients(recipeId: Int) : Flow<List<Ingredient>>
+    fun getIngredients(recipeId: Long) : List<Ingredient>
 
 }

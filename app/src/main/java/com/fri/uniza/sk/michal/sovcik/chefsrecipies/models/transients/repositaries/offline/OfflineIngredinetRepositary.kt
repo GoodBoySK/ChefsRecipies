@@ -7,8 +7,8 @@ import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositari
 import kotlinx.coroutines.flow.Flow
 
 class OfflineIngredinetRepositary(val ingredientDao: IngredientDao) : IngredientRepositary {
-    override suspend fun insert(item: Ingredient) {
-        ingredientDao.insert(item)
+    override suspend fun insert(item: Ingredient) : Long {
+        return ingredientDao.insert(item)
     }
 
     override suspend fun update(item: Ingredient) {
@@ -19,7 +19,7 @@ class OfflineIngredinetRepositary(val ingredientDao: IngredientDao) : Ingredient
         ingredientDao.delete(item)
     }
 
-    override fun getInstructions(recipeId: Int): Flow<List<InstructionsOfRecipe>> {
-        return ingredientDao.getInstructions(recipeId)
+    override fun getIngredients(recipeId: Long): List<Ingredient> {
+        return ingredientDao.getIngrendience(recipeId)
     }
 }

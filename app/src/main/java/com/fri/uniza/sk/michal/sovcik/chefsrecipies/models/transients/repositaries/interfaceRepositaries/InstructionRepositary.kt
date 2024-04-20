@@ -12,8 +12,8 @@ import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.daos.Ingre
 import kotlinx.coroutines.flow.Flow
 
 interface InstructionRepositary {
-    suspend fun insert(item: Instruction)
+    suspend fun insert(item: Instruction) : Long
     suspend fun update(item: Instruction)
     suspend fun delete(item: Instruction)
-    fun getInstructions(recipeId: Int) : Flow<List<Instruction>>
+    fun getInstructions(recipeId: Long) : List<Instruction>
 }

@@ -16,12 +16,12 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface InstructionDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insert(item: Instruction)
+    suspend fun insert(item: Instruction) : Long
     @Update
     suspend fun update(item: Instruction)
     @Delete
     suspend fun delete(item: Instruction)
     @Transaction
     @Query("SELECT * FROM Instruction WHERE recipeId = :recipeId")
-    fun getInstructions(recipeId: Int) : Flow<List<Instruction>>
+    fun getInstructions(recipeId: Long) : List<Instruction>
 }

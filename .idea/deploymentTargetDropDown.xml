@@ -4,9 +4,9 @@
     <value>
       <entry key="NavPreview">
         <State>
-          <runningDeviceTargetSelectedWithDropDown>
+          <targetSelectedWithDropDown>
             <Target>
-              <type value="RUNNING_DEVICE_TARGET" />
+              <type value="QUICK_BOOT_TARGET" />
               <deviceKey>
                 <Key>
                   <type value="VIRTUAL_DEVICE_PATH" />
@@ -14,9 +14,12 @@
                 </Key>
               </deviceKey>
             </Target>
-          </runningDeviceTargetSelectedWithDropDown>
-          <timeTargetWasSelectedWithDropDown value="2024-04-20T16:46:57.562028900Z" />
+          </targetSelectedWithDropDown>
+          <timeTargetWasSelectedWithDropDown value="2024-04-20T19:54:09.033134100Z" />
         </State>
+      </entry>
+      <entry key="RecipeDetailPreview">
+        <State />
       </entry>
       <entry key="app">
         <State />

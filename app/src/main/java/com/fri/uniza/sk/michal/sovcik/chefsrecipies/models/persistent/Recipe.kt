@@ -1,5 +1,6 @@
 package com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent
 
+import android.graphics.Bitmap
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.Index
@@ -17,7 +18,7 @@ enum class DishType{
 @Entity(indices = [Index(value = ["name"], unique = true)])
 data class Recipe(
     @PrimaryKey(autoGenerate = true)
-    val id:Long = -1,
+    val id:Long = 0,
     val name:String = "",
     val dishType: DishType = DishType.Soup,
     val time:Int = 0,
@@ -25,13 +26,13 @@ data class Recipe(
     val rating: Float = 0f,
     val autor: String = "",
     val description: String = "",
-    val picPath: String? = null
+    val bitmap: Bitmap? = null
     )
 
 @Entity
 data class Ingredient(
     @PrimaryKey(autoGenerate = true)
-    val id:Long = -1,
+    val id:Long = 0,
     val name:String = "",
     val amount: Float = 0f,
     val measuremnts: String = "",
@@ -70,8 +71,10 @@ data class Instruction(
     val id:Long,
     val orderNum:Int,
     val text:String,
+    val temperature:Int,
+    val stopTime:Float,//mins
     val recipeId: Long,
-    val imgPath:String?
+    val bitmap: Bitmap?
 )
 data class InstructionsOfRecipe(
     @Embedded val recipe: Recipe,

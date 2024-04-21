@@ -50,6 +50,7 @@ android {
 
 dependencies {
 
+
     val camerax_version = "1.2.2"
     implementation ("androidx.camera:camera-core:${camerax_version}")
     implementation ("androidx.camera:camera-camera2:${camerax_version}")

@@ -12,11 +12,11 @@ class PreviewRecipeRepositary : RecipeRepositary{
     private val list:MutableList<Recipe> = mutableListOf()
     private val tagList:MutableList<Tag> = mutableListOf()
     init {
-        list.add(Recipe(0,"Cookies",DishType.Dezert,30,15,4.5f,"Michal","This cookies will blow you mind!!!!",null))
-        tagList.add(Tag(0, "Sugar"))
-        tagList.add(Tag(0, "Milk"))
-        tagList.add(Tag(0, "Sweat"))
-        tagList.add(Tag(0, "American"))
+        list.add(Recipe(1,"Cookies",DishType.Dezert,30,15,4.5f,"Michal","This cookies will blow you mind!!!!",null))
+        tagList.add(Tag(1, "Sugar"))
+        tagList.add(Tag(1, "Milk"))
+        tagList.add(Tag(1, "Sweat"))
+        tagList.add(Tag(1, "American"))
     }
     override fun getAllRecipiesStream(): Flow<List<Recipe>> {
         return  flowOf(list)
@@ -26,12 +26,12 @@ class PreviewRecipeRepositary : RecipeRepositary{
         return tagList.toList()
     }
 
-    override fun getRecipe(name: String): Recipe {
-        return list.filter {it.name == name}[0]
+    override fun getRecipe(name: String): Recipe? {
+        return list.filter {it.name == name}.firstOrNull()
     }
 
-    override fun getRecipe(id: Long): Recipe {
-        return list.filter {it.id == id}[0]
+    override fun getRecipe(id: Long): Recipe? {
+        return list.filter {it.id == id}.firstOrNull()
 
     }
 

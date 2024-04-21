@@ -1,11 +1,15 @@
-@file:OptIn(ExperimentalFoundationApi::class)
+@file:OptIn(ExperimentalFoundationApi::class, ExperimentalFoundationApi::class,
+    ExperimentalFoundationApi::class
+)
 
 package com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.views
 
 import android.content.res.Resources.Theme
 import android.net.Uri
+import android.os.Build
 import android.widget.EditText
 import android.widget.NumberPicker
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -37,11 +41,13 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AllInclusive
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DeviceThermostat
 import androidx.compose.material.icons.filled.Fastfood
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Timelapse
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
@@ -123,6 +129,7 @@ fun makeText(text:String,pos:String ):AnnotatedString {
     }
     return sb.toAnnotatedString()
 }
+@RequiresApi(Build.VERSION_CODES.P)
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun RecipeDetailView(modifier: Modifier = Modifier, viewModel: RecipeDetailViewModel) {
@@ -134,7 +141,7 @@ fun RecipeDetailView(modifier: Modifier = Modifier, viewModel: RecipeDetailViewM
     val instructions by viewModel.instructionState.collectAsState()
     val tags by viewModel.tagState.collectAsState()
 
-    Box (){
+    Box {
         //Back FloatingButtpn
         Column (modifier = Modifier
             .align(Alignment.TopStart)
@@ -204,20 +211,20 @@ fun RecipeDetailView(modifier: Modifier = Modifier, viewModel: RecipeDetailViewM
 
 
         ) {
-            var uri = Uri.EMPTY
-            if (recipe.picPath != null){
-                uri = Uri.parse(recipe.picPath)
-            }
+
             item {
                 ImageWithChose(
+                    LocalContext.current.contentResolver,
                     modifier = Modifier
                         .height(400.dp)
                         .fillMaxWidth()
-                        .fillMaxHeight(),path =  uri,
+                        .fillMaxHeight(),
+                        bitmap =  recipe.bitmap,
                     onImgChose =
                     {
                         if (it != null){
-                            var newRecipe = recipe.copy(picPath = it.toString())
+
+                            var newRecipe = recipe.copy(bitmap = it)
                             viewModel.editRecipe(newRecipe)
                         }
                     },
@@ -231,14 +238,14 @@ fun RecipeDetailView(modifier: Modifier = Modifier, viewModel: RecipeDetailViewM
                 ) {
                     Tab(selected = true, onClick =
                     {
-                        navController.popBackStack();
+                        navController.popBackStack()
                         navController.navigate(DetailViewParts.Desctiption.name)
                         viewModel.updateUIState(uiState.copy(selectedTabIndex = 0))
                     }, modifier = Modifier.height(40.dp)) {
                         Icon(Icons.Filled.Image, contentDescription = "Description")
                     }
                     Tab(selected = false, onClick = {
-                        navController.popBackStack();
+                        navController.popBackStack()
                         navController.navigate(DetailViewParts.Ingredients.name)
                         viewModel.updateUIState(uiState.copy(selectedTabIndex = 1))
                     }) {
@@ -256,7 +263,7 @@ fun RecipeDetailView(modifier: Modifier = Modifier, viewModel: RecipeDetailViewM
             }
 
             item {
-                NavHost(navController = navController, startDestination = DetailViewParts.Desctiption.name, modifier = Modifier)
+                NavHost(navController = navController, startDestination = DetailViewParts.Instructions.name, modifier = Modifier)
             {
                 composable(route = DetailViewParts.Desctiption.name)
                 {
@@ -411,7 +418,8 @@ fun RecipeDetailView(modifier: Modifier = Modifier, viewModel: RecipeDetailViewM
                     {
                         //First line
                         Row {
-                            TextField(value = recipe.time.toString(),
+                            TextField(
+                                value = recipe.time.toString(),
                                 onValueChange = {},
                                 enabled = false,
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -474,16 +482,14 @@ fun RecipeDetailView(modifier: Modifier = Modifier, viewModel: RecipeDetailViewM
                                     singleLine = true,
                                     enabled = uiState.isEditable
                                 )
-                                TextField(
-                                    value = ingredient.amount.toString(),
+                                DecimalTextField(
+                                    number = ingredient.amount,
                                     onValueChange = {
-                                        viewModel.editIngredients(ingredient.copy(amount = it.toFloat()),index)
+                                        viewModel.editIngredients(ingredient.copy(amount = it ),index)
                                     },
-                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                                     modifier = Modifier
                                         .weight(2f)
                                         .padding(2.dp, 5.dp),
-                                    singleLine = true,
                                     enabled = uiState.isEditable
                                 )
                                 TextField(
@@ -499,7 +505,7 @@ fun RecipeDetailView(modifier: Modifier = Modifier, viewModel: RecipeDetailViewM
                                 )
                                 if (uiState.isEditable) {
                                     CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
-                                        IconButton(onClick = { /*TODO*/ }, modifier = Modifier.align(Alignment.CenterVertically))
+                                        IconButton(onClick = { viewModel.removeIngredients(ingredient) }, modifier = Modifier.align(Alignment.CenterVertically))
                                         {
                                             Icon(Icons.Filled.Close, contentDescription = "Close")
                                         }
@@ -517,6 +523,57 @@ fun RecipeDetailView(modifier: Modifier = Modifier, viewModel: RecipeDetailViewM
                 }
                 composable(route = DetailViewParts.Instructions.name)
                 {
+                    Column {
+                        instructions.forEachIndexed { index, instruction ->
+                            Column(modifier = Modifier
+                                .padding(5.dp)
+                                .fillMaxWidth())
+                            {
+                                OutlinedTextField(
+                                    value = instruction.text,
+                                    onValueChange = {
+                                        viewModel.editInstruction(instruction.copy(text = it),index)
+                                    },
+                                    enabled = uiState.isEditable,
+                                    modifier = Modifier.fillMaxWidth()
+
+                                )
+                                Row (
+                                    modifier = Modifier.fillMaxWidth()
+                                ){
+                                    DecimalTextField(number = instruction.stopTime, onValueChange = {
+                                        viewModel.editInstruction(instruction.copy(stopTime = it),index)
+                                        },
+                                        enabled = uiState.isEditable,
+                                        prefix = { Icon(Icons.Filled.Timelapse, contentDescription = "Clock")},
+                                        suffix = { Text(text = "min")},
+                                        modifier = Modifier
+                                            .padding(5.dp)
+                                            .weight(1f)
+                                    )
+                                    NumberTextField(number = instruction.temperature,
+                                        enabled = uiState.isEditable,
+                                        prefix = { Icon(Icons.Filled.DeviceThermostat, contentDescription = "Thermometer")},
+                                        suffix = { Text(text = "C")},
+                                        modifier = Modifier
+                                            .padding(5.dp)
+                                            .weight(1f)
+                                        )
+                                }
+                                if (uiState.isEditable)
+                                {
+                                    ImageWithChose(
+                                        contentResolver = LocalContext.current.contentResolver,
+                                        bitmap = instruction.bitmap,
+                                        onImgChose = {
+                                            viewModel.editInstruction(instruction.copy(bitmap = it),index)
+                                        },
+                                        isActive =  uiState.isEditable
+                                    )
+                                }
+                            }
+                        }
+                    }
 
                 }
             }
@@ -528,6 +585,7 @@ fun RecipeDetailView(modifier: Modifier = Modifier, viewModel: RecipeDetailViewM
 
 }
 
+@RequiresApi(Build.VERSION_CODES.P)
 @Preview(
     showSystemUi = true,
     showBackground = true

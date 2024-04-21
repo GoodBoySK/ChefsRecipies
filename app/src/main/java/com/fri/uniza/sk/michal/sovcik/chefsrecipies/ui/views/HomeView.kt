@@ -44,10 +44,12 @@ import androidx.graphics.shapes.RoundedPolygon
 import androidx.graphics.shapes.toPath
 import androidx.graphics.shapes.transformed
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.R
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.DishType
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Recipe
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.AppDatabase
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.Views
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.FilteredRecipes
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.offline.OfflineRecipeRepositary
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.preview.PreviewRecipeRepositary
@@ -59,7 +61,8 @@ import kotlinx.coroutines.runBlocking
 
 @Composable
 fun HomeView(modifier: Modifier = Modifier,
-             state: State<FilteredRecipes>
+             state: State<FilteredRecipes>,
+             navController: NavController
 )
 {
     val colorSchee = MaterialTheme.colorScheme
@@ -96,7 +99,7 @@ fun HomeView(modifier: Modifier = Modifier,
                 Text(text = stringResource(pair.second), style = MaterialTheme.typography.titleLarge, modifier = Modifier)
                 LazyRow (modifierReusable){
                     items(pair.first){
-                        RecipeCard(recipe = it, modifier = modifierReusable,{})
+                        RecipeCard(recipe = it, modifier = modifierReusable,{ navController.navigate(Views.RECIPEDETAIL.name + "/" + it.id) })
                     }
                 }
             }
@@ -138,7 +141,8 @@ fun HomeViewPreview(){
     }
     ChefsRecipiesTheme {
             val state = mutableStateOf(FilteredRecipes(mainDishRecipes = listOf(Recipe(0,"Main",DishType.MainDish,30,15,3f,"michal",""))))
-        HomeView(modifier = Modifier,
+        HomeView(
+            navController = NavController(LocalContext.current),modifier = Modifier,
                 state = state)
 
     }

@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.Converters
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Ingredient
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Instruction
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Recipe
@@ -17,6 +19,7 @@ import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.daos.TagDa
     version = 1,
     exportSchema = false
 )
+@TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase(){
     abstract fun recipeDao(): RecipeDao
     abstract fun ingredientDao(): IngredientDao

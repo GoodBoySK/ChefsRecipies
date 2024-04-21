@@ -1,10 +1,18 @@
 package com.fri.uniza.sk.michal.sovcik.chefsrecipies
 
+import android.Manifest
+import android.app.Activity
 import android.app.Application
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -35,7 +43,12 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -45,6 +58,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -75,12 +90,15 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
             ChefsRecipiesTheme {
                 // A surface container using the 'background' color from the theme
+
+
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                     Navigation()
                 }
@@ -88,11 +106,36 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+@RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun Navigation() {
     val navControler = rememberNavController()
     val primaryColor = MaterialTheme.colorScheme.primary
+    var permisionGranted by remember {
+        mutableStateOf(false)
+    }
+    val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) {
+        if (it) {
+            permisionGranted = true;
+            Log.i("Permisions","Permision granted")
+        }
+        else{
+            Log.e("Permisions","Permision denied")
+        }
+    }
 
+
+    if (ContextCompat.checkSelfPermission(LocalContext.current, Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
+        LaunchedEffect(Unit) {
+            launcher.launch(Manifest.permission.CALL_PHONE)
+        }
+
+
+
+    } else {
+        permisionGranted = true;
+        // Permission has been granted, proceed with accessing the picker URI
+    }
     Column (modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Bottom){
         NavHost(navController = navControler,
             startDestination = Views.HOME.name,
@@ -107,7 +150,7 @@ fun Navigation() {
                             LocalContext.current).recipeDao(),AppDatabase.getDatabase(LocalContext.current).tagDao())
                 )
                 )
-                HomeView(state =  viewModel.recipesFilter.collectAsState())
+                HomeView(navController = navControler,state =  viewModel.recipesFilter.collectAsState())
             }
             composable(route = Views.SEARCH.name) {
                 val context = LocalContext
@@ -115,7 +158,7 @@ fun Navigation() {
             }
             composable(route = Views.RECIPEDETAIL.name + "/{recipeId}", arguments = listOf(
                 navArgument(name = "recipeId"){
-                    type = NavType.IntType
+                    type = NavType.LongType
                     nullable = false
                 })) {
                 val context = LocalContext
@@ -126,7 +169,7 @@ fun Navigation() {
                 val offlineIngredientRepo = OfflineIngredinetRepositary(AppDatabase.getDatabase(
                     LocalContext.current).ingredientDao())
                 val viewModel = viewModel<RecipeDetailViewModel>(factory = RecipeViewModelFactory(
-                    offlineRecipeRepo,offlineIngredientRepo,offlineInstructionRepo,navControler,it.arguments?.getInt("recipeId") ?: -1))
+                    offlineRecipeRepo,offlineIngredientRepo,offlineInstructionRepo,navControler,it.arguments?.getLong("recipeId") ?: 0))
                 RecipeDetailView(
                      viewModel = viewModel)
             }
@@ -149,7 +192,7 @@ fun Navigation() {
                 Button(
                     onClick = {
 
-                        navControler.navigate(Views.RECIPEDETAIL.name + "/-1")
+                        navControler.navigate(Views.RECIPEDETAIL.name + "/0")
                               },
                     shape = CircleShape,
                     modifier = Modifier

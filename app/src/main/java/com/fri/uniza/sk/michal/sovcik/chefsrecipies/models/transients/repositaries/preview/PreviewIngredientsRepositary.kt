@@ -12,9 +12,9 @@ import kotlinx.coroutines.flow.flowOf
 class PreviewIngredientsRepositary : IngredientRepositary {
     private val list:MutableList<Ingredient> = mutableListOf()
     init {
-        list.add(Ingredient(0,"Flour",400f,"gssssss",0))
-        list.add(Ingredient(1,"Egg",3f,"ks",0))
-        list.add(Ingredient(2,"Sugar",200f,"g",0))
+        list.add(Ingredient(1,"Flour",400f,"gssssss",1))
+        list.add(Ingredient(2,"Egg",3f,"ks",1))
+        list.add(Ingredient(3,"Sugar",200f,"g",1))
     }
     override suspend fun insert(item: Ingredient) : Long{
         list.add(item)

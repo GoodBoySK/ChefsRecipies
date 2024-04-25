@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalFoundationApi::class)
+
 package com.fri.uniza.sk.michal.sovcik.chefsrecipies
 
 import android.Manifest
@@ -13,6 +15,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -79,6 +82,8 @@ import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.viewmodels.HomeViewModel
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.viewmodels.HomeViewModelFactory
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.viewmodels.RecipeDetailViewModel
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.viewmodels.RecipeViewModelFactory
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.viewmodels.SearchViewModel
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.viewmodels.SearchViewModelFactory
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.views.HomeView
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.views.ImportView
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.views.RecipeDetailView
@@ -93,6 +98,13 @@ class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS,Manifest.permission.READ_MEDIA_IMAGES,Manifest.permission.CAMERA),
+                0)
+        }
+
+
+
 
         setContent {
             ChefsRecipiesTheme {
@@ -106,36 +118,17 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+@ExperimentalFoundationApi
 @RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun Navigation() {
     val navControler = rememberNavController()
     val primaryColor = MaterialTheme.colorScheme.primary
-    var permisionGranted by remember {
-        mutableStateOf(false)
-    }
-    val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) {
-        if (it) {
-            permisionGranted = true;
-            Log.i("Permisions","Permision granted")
-        }
-        else{
-            Log.e("Permisions","Permision denied")
-        }
-    }
-
-
-    if (ContextCompat.checkSelfPermission(LocalContext.current, Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
-        LaunchedEffect(Unit) {
-            launcher.launch(Manifest.permission.CALL_PHONE)
-        }
 
 
 
-    } else {
-        permisionGranted = true;
-        // Permission has been granted, proceed with accessing the picker URI
-    }
+
+
     Column (modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Bottom){
         NavHost(navController = navControler,
             startDestination = Views.HOME.name,
@@ -154,22 +147,33 @@ fun Navigation() {
             }
             composable(route = Views.SEARCH.name) {
                 val context = LocalContext
-                SearchView()
+                val viewModel = viewModel<SearchViewModel>(
+                    factory = SearchViewModelFactory(repository =  OfflineRecipeRepositary(AppDatabase.getDatabase(
+                        LocalContext.current).recipeDao(),AppDatabase.getDatabase(
+                        LocalContext.current).tagDao()),
+                        OfflineIngredinetRepositary(AppDatabase.getDatabase(LocalContext.current).ingredientDao()))
+                )
+                SearchView(viewModel = viewModel)
             }
             composable(route = Views.RECIPEDETAIL.name + "/{recipeId}", arguments = listOf(
                 navArgument(name = "recipeId"){
                     type = NavType.LongType
                     nullable = false
                 })) {
-                val context = LocalContext
+                val context = LocalContext.current
                 val offlineRecipeRepo = OfflineRecipeRepositary(AppDatabase.getDatabase(
                     LocalContext.current).recipeDao(),AppDatabase.getDatabase(LocalContext.current).tagDao())
                 val offlineInstructionRepo = OfflineInstructionRepositary(AppDatabase.getDatabase(
                     LocalContext.current).instructionDao())
                 val offlineIngredientRepo = OfflineIngredinetRepositary(AppDatabase.getDatabase(
                     LocalContext.current).ingredientDao())
+
+
                 val viewModel = viewModel<RecipeDetailViewModel>(factory = RecipeViewModelFactory(
-                    offlineRecipeRepo,offlineIngredientRepo,offlineInstructionRepo,navControler,it.arguments?.getLong("recipeId") ?: 0))
+                    offlineRecipeRepo,offlineIngredientRepo,offlineInstructionRepo,navControler,it.arguments?.getLong("recipeId") ?: 0,context = context))
+
+
+
                 RecipeDetailView(
                      viewModel = viewModel)
             }
@@ -226,11 +230,15 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
     )
 }
 
+@ExperimentalFoundationApi
+@RequiresApi(Build.VERSION_CODES.P)
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun NavPreview() {
     val db = AppDatabase.getDatabase(LocalContext.current)
     ChefsRecipiesTheme {
-        Navigation()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            Navigation()
+        }
     }
 }

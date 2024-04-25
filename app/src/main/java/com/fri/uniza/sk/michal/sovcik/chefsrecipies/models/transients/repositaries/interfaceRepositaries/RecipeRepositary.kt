@@ -11,54 +11,40 @@ interface RecipeRepositary {
          *Retrievie all recipies by strream
          */
         fun getAllRecipiesStream(): Flow<List<Recipe>>
-
-
-
-        fun getAllTags(id: Long) : List<Tag>
-
-
         /**
          * Retrieve an Recipe from that matches with the [name].
          */
-        fun getRecipe(name: String): Recipe?
-
-
+        fun getRecipe(name: String): Flow<Recipe>
+        fun getRecipe(id: Long): Flow<Recipe>
 
         fun getRecipeOfType(dishType: DishType): Flow<List<Recipe>>
-
         /**
          * Retrieve an Recipe from  that matches with the [id].
          */
-        fun getRecipe(id: Long): Recipe?
-
         /**
          * Insert recipe in the data source
          */
         suspend fun insertRecipe(recipe: Recipe) : Long
-
         /**
          * Delete recipe from the data source
          */
         suspend fun deleteRecipe(recipe: Recipe)
-
         /**
          * Update recipe in the data source
          */
         suspend fun updateRecipe(recipe: Recipe)
-
         /**
          * Insert recipe in the data source
          */
         suspend fun insertTag(tag: Tag)
-
         /**
          * Delete recipe from the data source
          */
         suspend fun deleteTag(tag: Tag)
+        fun getAllTags(id: Long) : Flow<List<Tag>>
+        fun getAllTagsLike(string: String) : Flow<List<Tag>>
 
-        /**
-         * Update recipe in the data source
-         */
+
 
 
 }

@@ -13,15 +13,15 @@ class OfflineRecipeRepositary(private val recipeDao:RecipeDao, private val tagDa
         return recipeDao.getAllRecipies()
     }
 
-    override fun getAllTags(id:Long): List<Tag> {
+    override fun getAllTags(id:Long): Flow<List<Tag>> {
         return tagDao.getTags(id)
     }
 
-    override fun getRecipe(name: String): Recipe? {
+    override fun getRecipe(name: String): Flow<Recipe> {
         return recipeDao.getRecipe(name)
     }
 
-    override fun getRecipe(id: Long): Recipe? {
+    override fun getRecipe(id: Long): Flow<Recipe> {
         return recipeDao.getRecipe(id)
     }
 

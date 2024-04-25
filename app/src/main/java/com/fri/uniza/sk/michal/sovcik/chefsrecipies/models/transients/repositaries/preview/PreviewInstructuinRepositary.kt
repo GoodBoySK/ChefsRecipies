@@ -26,7 +26,7 @@ class PreviewInstructuinRepositary : InstructionRepositary {
         list.remove(item)
     }
 
-    override fun getInstructions(recipeId: Long): List<Instruction> {
-        return list.filter { it.recipeId == recipeId }
+    override fun getInstructions(recipeId: Long): Flow<List<Instruction>> {
+        return flowOf(list.filter { it.recipeId == recipeId })
     }
 }

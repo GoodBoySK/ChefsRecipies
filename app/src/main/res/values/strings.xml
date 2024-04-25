@@ -5,4 +5,6 @@
     <string name="maindish">MainDish</string>
     <string name="breakfast">BreakFast</string>
     <string name="recipenameplaceholder">RecipeName</string>
+    <string name="themeratureUnits">C</string>
+    <string name="timeUnitShortcut">min</string>
 </resources>

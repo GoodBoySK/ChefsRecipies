@@ -158,16 +158,11 @@ fun ImageWithChose(contentResolver: ContentResolver,modifier: Modifier = Modifie
 }
 
 @Composable
-fun NumberTextField(number: Int,modifier: Modifier = Modifier,enabled: Boolean = true,  suffix: @Composable()(()->Unit)? = null,prefix: @Composable()(()->Unit)? = null, onValueChange:((it:Int)->Unit)? = null, textStyle:TextStyle = MaterialTheme.typography.bodyLarge) {
+fun NumberTextField(number: String,modifier: Modifier = Modifier,enabled: Boolean = true,  suffix: @Composable()(()->Unit)? = null,prefix: @Composable()(()->Unit)? = null, onValueChange:((it:String)->Unit)? = null, textStyle:TextStyle = MaterialTheme.typography.bodyLarge) {
     TextField(
-        value = if(number != 0) {
-            number.toString()
-        }else
-        {
-            ""
-        },
+        value = number,
         onValueChange = {
-            onValueChange?.let { it1 -> it1(it.replace(",","").replace(".","").toIntOrNull() ?: 0) }
+            onValueChange?.let { it1 -> it1(it.replace(",","").replace(".","")) }
                         },
 
         textStyle = textStyle,
@@ -190,26 +185,15 @@ fun NumberTextField(number: Int,modifier: Modifier = Modifier,enabled: Boolean =
 
 
 @Composable
-fun DecimalTextField(number: Float,modifier: Modifier = Modifier,enabled: Boolean = true,
+fun DecimalTextField(number: String,modifier: Modifier = Modifier,enabled: Boolean = true,
                      suffix: @Composable()(()->Unit)? = null, prefix: @Composable()(()->Unit)? = null,
-                     onValueChange:((it:Float)->Unit)? = null,
+                     onValueChange:((it:String)->Unit)? = null,
                      textStyle:TextStyle = MaterialTheme.typography.bodyLarge) {
-    var internalString by remember {
-        mutableStateOf(number.toString())
-    }
     TextField(
-        value = if(number != 0f) {
-            internalString
-        }else
-        {
-            ""
-        },
+        value = number,
         onValueChange = {
             onValueChange?.let { it1 ->
-                internalString = it
-                var string = it
-                if (string.endsWith(",") || string.endsWith(".")) string = string + "0"
-                it1(string.toFloatOrNull() ?: 0.0f) }
+                it1(it) }
         },
 
         textStyle = textStyle,
@@ -220,12 +204,7 @@ fun DecimalTextField(number: Float,modifier: Modifier = Modifier,enabled: Boolea
             )
         },
 
-        modifier = modifier.onFocusChanged {
-            if (!it.hasFocus) {
-                if (internalString.endsWith(",") || internalString.endsWith("."))
-                    internalString = internalString + "0"
-            }
-        },
+        modifier = modifier,
         suffix = suffix,
         prefix = prefix,
         singleLine = true,

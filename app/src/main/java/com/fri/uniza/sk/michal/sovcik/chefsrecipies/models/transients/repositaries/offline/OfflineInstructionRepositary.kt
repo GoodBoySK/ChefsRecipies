@@ -18,7 +18,7 @@ class OfflineInstructionRepositary(val instructionDao: InstructionDao) : Instruc
         instructionDao.delete(item)
     }
 
-    override fun getInstructions(recipeId: Long): List<Instruction> {
+    override fun getInstructions(recipeId: Long): Flow<List<Instruction>> {
         return instructionDao.getInstructions(recipeId)
     }
 }

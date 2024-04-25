@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface RecipeDao {
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(recipe:Recipe) : Long
     @Update
     suspend fun update(recipe:Recipe)
@@ -22,9 +22,9 @@ interface RecipeDao {
     suspend fun delete(recipe:Recipe)
 
     @Query("SELECT * from recipe where name = :name limit 1")
-    fun getRecipe(name:String) : Recipe?
+    fun getRecipe(name:String) : Flow<Recipe>
     @Query("SELECT * from recipe where id = :id")
-    fun getRecipe(id:Long) : Recipe?
+    fun getRecipe(id:Long) : Flow<Recipe>
 
     @Query("SELECT * from recipe ORDER BY name ASC")
     fun getAllRecipies(): Flow<List<Recipe>>

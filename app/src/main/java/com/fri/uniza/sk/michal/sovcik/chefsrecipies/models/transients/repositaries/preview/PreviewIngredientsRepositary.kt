@@ -29,8 +29,8 @@ class PreviewIngredientsRepositary : IngredientRepositary {
         list.remove(item)
     }
 
-    override fun getIngredients(recipeId: Long): List<Ingredient> {
-        return list.filter { it.recipeId == recipeId }
+    override fun getIngredients(recipeId: Long): Flow<List<Ingredient>> {
+        return flowOf(list.filter { it.recipeId == recipeId })
     }
 
 }

@@ -29,25 +29,6 @@ data class Recipe(
     val bitmap: Bitmap? = null
     )
 
-@Entity
-data class Ingredient(
-    @PrimaryKey(autoGenerate = true)
-    val id:Long = 0,
-    val name:String = "",
-    val amount: Float = 0f,
-    val measuremnts: String = "",
-    val recipeId: Long = 0
-)
-data class IngredientsOfRecipe(
-    @Embedded val recipe: Recipe,
-    @Relation(
-        parentColumn = "id",
-        entityColumn = "recipeId"
-    )
-    val ingredients: List<Ingredient>
-)
-
-
 
 @Entity(primaryKeys = ["recipeId","tag"])
 data class Tag(
@@ -65,22 +46,3 @@ data class TagsOfRecipe(
 
 
 
-@Entity
-data class Instruction(
-    @PrimaryKey(autoGenerate = true)
-    val id:Long,
-    val orderNum:Int,
-    val text:String,
-    val temperature:Int,
-    val stopTime:Float,//mins
-    val recipeId: Long,
-    val bitmap: Bitmap?
-)
-data class InstructionsOfRecipe(
-    @Embedded val recipe: Recipe,
-    @Relation(
-        parentColumn = "id",
-        entityColumn = "recipeId"
-    )
-    val ingredients: List<Instruction>
-)

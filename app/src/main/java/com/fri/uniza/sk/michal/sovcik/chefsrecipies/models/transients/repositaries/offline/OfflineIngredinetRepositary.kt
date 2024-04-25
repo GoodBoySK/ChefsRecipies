@@ -19,7 +19,7 @@ class OfflineIngredinetRepositary(val ingredientDao: IngredientDao) : Ingredient
         ingredientDao.delete(item)
     }
 
-    override fun getIngredients(recipeId: Long): List<Ingredient> {
+    override fun getIngredients(recipeId: Long): Flow<List<Ingredient>> {
         return ingredientDao.getIngrendience(recipeId)
     }
 }

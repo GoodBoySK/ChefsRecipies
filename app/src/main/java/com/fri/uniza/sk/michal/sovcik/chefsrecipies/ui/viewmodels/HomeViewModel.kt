@@ -1,5 +1,6 @@
 package com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.viewmodels
 
+import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope

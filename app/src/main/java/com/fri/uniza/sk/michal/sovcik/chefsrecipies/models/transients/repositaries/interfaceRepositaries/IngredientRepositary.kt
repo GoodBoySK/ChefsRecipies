@@ -16,6 +16,6 @@ interface IngredientRepositary
     suspend fun insert(item: Ingredient) : Long
     suspend fun update(item: Ingredient)
     suspend fun delete(item: Ingredient)
-    fun getIngredients(recipeId: Long) : List<Ingredient>
+    fun getIngredients(recipeId: Long) : Flow<List<Ingredient>>
 
 }

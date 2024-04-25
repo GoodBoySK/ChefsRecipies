@@ -22,17 +22,16 @@ class PreviewRecipeRepositary : RecipeRepositary{
         return  flowOf(list)
     }
 
-    override fun getAllTags(id: Long): List<Tag> {
-        return tagList.toList()
+    override fun getAllTags(id: Long): Flow<List<Tag>> {
+        return flowOf(tagList.toList())
     }
 
-    override fun getRecipe(name: String): Recipe? {
-        return list.filter {it.name == name}.firstOrNull()
+    override fun getRecipe(name: String): Flow<Recipe> {
+        return flowOf(list.filter {it.name == name}.first())
     }
 
-    override fun getRecipe(id: Long): Recipe? {
-        return list.filter {it.id == id}.firstOrNull()
-
+    override fun getRecipe(id: Long): Flow<Recipe> {
+        return flowOf(list.filter {it.id == id}.first())
     }
 
     override fun getRecipeOfType(dishType: DishType): Flow<List<Recipe>> {

@@ -21,6 +21,6 @@ interface IngredientDao {
     suspend fun delete(item: Ingredient)
     @Transaction
     @Query("SELECT * FROM Ingredient WHERE recipeId = :recipeId")
-    fun getIngrendience(recipeId: Long) : List<Ingredient>
+    fun getIngrendience(recipeId: Long) : Flow<List<Ingredient>>
 
 }

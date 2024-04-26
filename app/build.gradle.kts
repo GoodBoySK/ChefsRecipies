@@ -4,7 +4,9 @@ plugins {
     id("com.google.devtools.ksp")
     id ("kotlin-kapt")
 }
-
+repositories {
+    google()
+}
 android {
     namespace = "com.fri.uniza.sk.michal.sovcik.chefsrecipies"
     compileSdk = 34
@@ -49,32 +51,34 @@ android {
 }
 
 dependencies {
+    implementation (libs.androidx.datastore.preferences)
+    implementation (libs.androidx.datastore)
+    implementation(libs.androidx.datastore.core.android)
+    implementation(libs.androidx.datastore.preferences.core.jvm)
+    val camerax_version = "1.3.3"
+    implementation (libs.androidx.camera.core)
+    implementation (libs.androidx.camera.camera2)
+    implementation (libs.androidx.camera.lifecycle)
+    implementation (libs.androidx.camera.video)
 
-
-    val camerax_version = "1.2.2"
-    implementation ("androidx.camera:camera-core:${camerax_version}")
-    implementation ("androidx.camera:camera-camera2:${camerax_version}")
-    implementation ("androidx.camera:camera-lifecycle:${camerax_version}")
-    implementation ("androidx.camera:camera-video:${camerax_version}")
-
-    implementation ("androidx.camera:camera-view:${camerax_version}")
-    implementation ("androidx.camera:camera-extensions:${camerax_version}")
+    implementation (libs.androidx.camera.view)
+    implementation (libs.androidx.camera.extensions)
 
 
 
     implementation(libs.core.ktx)
     implementation(libs.androidx.graphics.shapes.android)
-    implementation ("androidx.compose.material:material-icons-extended:1.6.5")
-    implementation("androidx.compose.ui:ui-tooling-preview-android:1.6.5")
+    implementation (libs.androidx.material.icons.extended)
+    implementation(libs.androidx.ui.tooling.preview.android)
     val room_version = "2.6.1"
-    implementation("androidx.room:room-runtime:$room_version")
-    annotationProcessor("androidx.room:room-compiler:$room_version")
-    implementation("androidx.room:room-ktx:$room_version")
-    kapt ("androidx.room:room-compiler:$room_version")
+    implementation(libs.androidx.room.runtime)
+    annotationProcessor(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+    kapt (libs.androidx.room.compiler)
 
     //ksp("androidx.room:room-compiler:$room_version")
-    implementation("androidx.navigation:navigation-compose:2.7.7")
-    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.coil.compose)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

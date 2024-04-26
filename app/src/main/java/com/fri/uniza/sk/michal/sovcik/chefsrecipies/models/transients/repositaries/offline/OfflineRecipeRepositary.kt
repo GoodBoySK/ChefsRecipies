@@ -1,6 +1,7 @@
 package com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.offline
 
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.DishType
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Ingredient
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Recipe
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Tag
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.daos.RecipeDao
@@ -15,6 +16,21 @@ class OfflineRecipeRepositary(private val recipeDao:RecipeDao, private val tagDa
 
     override fun getAllTags(id:Long): Flow<List<Tag>> {
         return tagDao.getTags(id)
+    }
+
+    override fun getAllTagsLike(filter: String): Flow<List<Tag>> {
+        return tagDao.getAllTags("%$filter%")
+    }
+
+    override fun getAllRecipies(
+        tags: List<String>,
+        ingredients: List<String>
+    ): Flow<List<Recipe>> {
+        if (tags.isEmpty() && ingredients.isEmpty()) return recipeDao.getAllRecipies()
+        if(tags.isEmpty() && ingredients.isNotEmpty()) return recipeDao.getAllRecipiesIngredients(ingredients = ingredients)
+        if(tags.isNotEmpty() && ingredients.isEmpty()) return recipeDao.getAllRecipiesTags(tags = tags)
+
+        return recipeDao.getAllRecipies(tags,ingredients)
     }
 
     override fun getRecipe(name: String): Flow<Recipe> {

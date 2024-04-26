@@ -8,6 +8,7 @@ import android.app.Application
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.preference.PreferenceDataStore
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -18,6 +19,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -63,6 +65,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -93,7 +98,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -102,8 +106,6 @@ class MainActivity : ComponentActivity() {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS,Manifest.permission.READ_MEDIA_IMAGES,Manifest.permission.CAMERA),
                 0)
         }
-
-
 
 
         setContent {
@@ -118,6 +120,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+@OptIn(ExperimentalLayoutApi::class)
 @ExperimentalFoundationApi
 @RequiresApi(Build.VERSION_CODES.P)
 @Composable
@@ -153,7 +156,9 @@ fun Navigation() {
                         LocalContext.current).tagDao()),
                         OfflineIngredinetRepositary(AppDatabase.getDatabase(LocalContext.current).ingredientDao()))
                 )
-                SearchView(viewModel = viewModel)
+                SearchView(viewModel = viewModel, goToDetail =  {
+                    navControler.navigate(Views.RECIPEDETAIL.name + "/${it.id}")
+                })
             }
             composable(route = Views.RECIPEDETAIL.name + "/{recipeId}", arguments = listOf(
                 navArgument(name = "recipeId"){

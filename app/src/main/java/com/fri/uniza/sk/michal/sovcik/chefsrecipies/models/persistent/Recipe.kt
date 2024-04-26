@@ -30,8 +30,10 @@ data class Recipe(
     )
 
 
-@Entity(primaryKeys = ["recipeId","tag"])
+@Entity
 data class Tag(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
     val recipeId: Long,
     val tag:String
 )

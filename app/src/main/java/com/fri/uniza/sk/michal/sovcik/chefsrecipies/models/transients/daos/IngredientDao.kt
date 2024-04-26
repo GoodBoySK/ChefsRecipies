@@ -8,7 +8,6 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Ingredient
-import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.InstructionsOfRecipe
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -22,5 +21,9 @@ interface IngredientDao {
     @Transaction
     @Query("SELECT * FROM Ingredient WHERE recipeId = :recipeId")
     fun getIngrendience(recipeId: Long) : Flow<List<Ingredient>>
+
+    @Transaction
+    @Query("SELECT * FROM Ingredient WHERE name COLLATE NOCASE LIKE :filter GROUP BY name")
+    fun getIngrendience(filter:String) : Flow<List<Ingredient>>
 
 }

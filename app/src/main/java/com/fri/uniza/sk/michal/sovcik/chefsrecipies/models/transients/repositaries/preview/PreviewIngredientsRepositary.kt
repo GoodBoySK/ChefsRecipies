@@ -1,11 +1,7 @@
 package com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.preview
 
-import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.DishType
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Ingredient
-import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.InstructionsOfRecipe
-import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Recipe
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.interfaceRepositaries.IngredientRepositary
-import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.interfaceRepositaries.RecipeRepositary
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
@@ -31,6 +27,10 @@ class PreviewIngredientsRepositary : IngredientRepositary {
 
     override fun getIngredients(recipeId: Long): Flow<List<Ingredient>> {
         return flowOf(list.filter { it.recipeId == recipeId })
+    }
+
+    override fun getIngredients(filter: String): Flow<List<Ingredient>> {
+        return flowOf(list.filter { it.name.contains(filter) })
     }
 
 }

@@ -129,6 +129,36 @@ class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredie
         }
 
     }
+    fun share(context: Context){
+        var text = """
+            ${recipeState.value.name}
+            author: ${recipeState.value.autor}
+            
+            Description:
+            ${recipeState.value.description}
+
+            Ingredients:
+            ${ingredientsState.value.forEach {
+            "${it.name} ${it.amount} ${it.measuremnts}\n" }
+            }
+            Instructions
+            ${instructionState.value.forEach { 
+                "${it.orderNum }. ${it.text}\n ${if (it.toData().stopTime != 0f) it.stopTime else ""} ${if (it.toData().temperature != 0)it.temperature else ""}\n"
+             
+            
+        }}
+            
+        """.trimIndent()
+
+
+        val shareIntent = Intent().apply {
+            action = Intent.ACTION_SEND
+            type = "plaint/text"
+            putExtra(Intent.EXTRA_TEXT,text)
+        }
+        val choser = Intent.createChooser(shareIntent,null)
+        context.startActivity(choser)
+    }
     fun updateUIState(newUIState: DetailViewState) {
         _uiState.value = newUIState
     }
@@ -137,7 +167,7 @@ class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredie
     }
     fun addTag(tag: Tag) {
         var list = tagState.value.toMutableList()
-        list.add(tag)
+        list.add(tag.copy(recipeId = recipeState.value.id))
         _tagsState.value = list.toList()
         _uiState.value = _uiState.value.copy(newTagText = "")
     }

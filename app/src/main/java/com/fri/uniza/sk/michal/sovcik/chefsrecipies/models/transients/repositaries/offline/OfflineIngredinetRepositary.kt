@@ -1,7 +1,6 @@
 package com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.offline
 
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Ingredient
-import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.InstructionsOfRecipe
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.daos.IngredientDao
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.interfaceRepositaries.IngredientRepositary
 import kotlinx.coroutines.flow.Flow
@@ -21,5 +20,9 @@ class OfflineIngredinetRepositary(val ingredientDao: IngredientDao) : Ingredient
 
     override fun getIngredients(recipeId: Long): Flow<List<Ingredient>> {
         return ingredientDao.getIngrendience(recipeId)
+    }
+
+    override fun getIngredients(filter: String): Flow<List<Ingredient>> {
+        return ingredientDao.getIngrendience("%$filter%")
     }
 }

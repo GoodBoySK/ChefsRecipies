@@ -7,10 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
-import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.IngredientsOfRecipe
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Instruction
-import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.InstructionsOfRecipe
-import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Recipe
 import kotlinx.coroutines.flow.Flow
 
 @Dao

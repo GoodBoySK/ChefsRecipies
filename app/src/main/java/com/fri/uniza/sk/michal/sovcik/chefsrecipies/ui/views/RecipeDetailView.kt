@@ -182,7 +182,7 @@ fun RecipeDetailView(modifier: Modifier = Modifier, viewModel: RecipeDetailViewM
             DropdownMenu(modifier = Modifier.zIndex(1f),expanded = uiState.menuShown, onDismissRequest = {viewModel.updateUIState(uiState.copy(menuShown = false))  }) {
                 DropdownMenuItem(enabled = true, modifier = Modifier, text = { Text(text = "Share", color = Color.Black) }, onClick = {
                     viewModel.updateUIState(uiState.copy(menuShown = false))
-
+                    viewModel.share(context)
                  })
                 DropdownMenuItem(text = { Text(text = "Edit On/Off") }, onClick = {
                     viewModel.updateUIState(uiState.copy(isEditable = !uiState.isEditable,menuShown = false))
@@ -630,8 +630,9 @@ private fun DetailViewDetail(
                         .clip(RoundedCornerShape(100))
                         .background(MaterialTheme.colorScheme.primary)
                 ) {
-                    Row(modifier = Modifier.padding(10.dp, 2.dp, 5.dp, 2.dp)) {
-                        Text(text = it.tag, maxLines = 1, color = Color.White)
+                    Row(modifier = Modifier.padding(10.dp, 2.dp, 15.dp, 2.dp)) {
+                        Text(text = it.tag, maxLines = 1, color = Color.White,
+                            modifier = Modifier.padding(5.dp,0.dp))
                         if (uiState.isEditable) {
                             Spacer(modifier = Modifier.width(10.dp))
                             Icon(
@@ -660,6 +661,9 @@ private fun DetailViewDetail(
                                 viewModel.updateUIState(uiState.copy(newTagText = it))
                             },
                             singleLine = true,
+                            keyboardActions = KeyboardActions(onAny = {
+                                viewModel.addTag(Tag(recipeId = recipe.id,tag = uiState.newTagText))
+                            })
                         ) {
                             if (uiState.newTagText == "") {
                                 Text(text = "AddText...", color = Color.White)
@@ -672,7 +676,7 @@ private fun DetailViewDetail(
                         Icon(
                             Icons.Filled.Add,
                             modifier = Modifier.clickable {
-                                viewModel.addTag(Tag(recipe.id, uiState.newTagText))
+                                viewModel.addTag(Tag(recipeId = recipe.id,tag = uiState.newTagText))
                             },
                             contentDescription = "close",
                             tint = Color.White

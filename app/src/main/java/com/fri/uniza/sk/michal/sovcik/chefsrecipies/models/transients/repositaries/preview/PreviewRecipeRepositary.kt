@@ -1,11 +1,11 @@
 package com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.preview
 
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.DishType
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Ingredient
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Recipe
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Tag
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.interfaceRepositaries.RecipeRepositary
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.flowOf
 
 class PreviewRecipeRepositary : RecipeRepositary{
@@ -13,10 +13,10 @@ class PreviewRecipeRepositary : RecipeRepositary{
     private val tagList:MutableList<Tag> = mutableListOf()
     init {
         list.add(Recipe(1,"Cookies",DishType.Dezert,30,15,4.5f,"Michal","This cookies will blow you mind!!!!",null))
-        tagList.add(Tag(1, "Sugar"))
-        tagList.add(Tag(1, "Milk"))
-        tagList.add(Tag(1, "Sweat"))
-        tagList.add(Tag(1, "American"))
+        tagList.add(Tag(1,1, "Sugar"))
+        tagList.add(Tag(2,1, "Milk"))
+        tagList.add(Tag(3,1, "Sweat"))
+        tagList.add(Tag(4,1, "American"))
     }
     override fun getAllRecipiesStream(): Flow<List<Recipe>> {
         return  flowOf(list)
@@ -24,6 +24,21 @@ class PreviewRecipeRepositary : RecipeRepositary{
 
     override fun getAllTags(id: Long): Flow<List<Tag>> {
         return flowOf(tagList.toList())
+    }
+
+    override fun getAllTagsLike(string: String): Flow<List<Tag>> {
+        return flowOf(
+            tagList.filter {
+                it.tag.contains(string)
+            }
+        )
+    }
+
+    override fun getAllRecipies(
+        tags: List<String>,
+        ingredients: List<String>
+    ): Flow<List<Recipe>> {
+        return flowOf(list)
     }
 
     override fun getRecipe(name: String): Flow<Recipe> {

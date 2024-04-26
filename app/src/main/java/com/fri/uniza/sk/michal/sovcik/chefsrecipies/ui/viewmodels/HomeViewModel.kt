@@ -1,12 +1,11 @@
 package com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.viewmodels
 
-import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
     import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.DishType
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Recipe
-import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.FilteredRecipes
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.UIModels.FilteredRecipes
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.interfaceRepositaries.RecipeRepositary
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,7 +39,7 @@ class HomeViewModel(val recipeRepositary: RecipeRepositary) : ViewModel() {
             filteredRecipes, maindish, dezret, soup, breakfast ->
         filteredRecipes.copy(mainDishRecipes = maindish, dezerRecipes = dezret, soupRecipes = soup, breakfastRecipes = breakfast)
 
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(100),FilteredRecipes())
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(100), FilteredRecipes())
 
 
     fun getAllRecipeOfType(dishType: DishType): Flow<List<Recipe>> {

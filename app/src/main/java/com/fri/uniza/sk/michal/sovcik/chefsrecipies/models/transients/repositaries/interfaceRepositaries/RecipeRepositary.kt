@@ -1,6 +1,7 @@
 package com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.interfaceRepositaries
 
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.DishType
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Ingredient
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Recipe
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Tag
 import kotlinx.coroutines.flow.Flow
@@ -43,6 +44,8 @@ interface RecipeRepositary {
         suspend fun deleteTag(tag: Tag)
         fun getAllTags(id: Long) : Flow<List<Tag>>
         fun getAllTagsLike(string: String) : Flow<List<Tag>>
+        fun getAllRecipies(tags: List<String>,ingredients:List<String>): Flow<List<Recipe>>
+
 
 
 

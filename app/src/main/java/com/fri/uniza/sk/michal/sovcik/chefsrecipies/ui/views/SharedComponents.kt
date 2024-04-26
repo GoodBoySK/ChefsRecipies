@@ -1,22 +1,14 @@
 package com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.views
 
-import android.Manifest
-import android.app.Activity
 import android.content.ContentResolver
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
-import android.net.DnsResolver
 import android.net.Uri
 import android.os.Build
-import android.provider.MediaStore
-import android.util.Log
-import android.view.Menu
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,35 +26,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.modifier.modifierLocalConsumer
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
-import androidx.core.graphics.decodeBitmap
-import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
-import com.fri.uniza.sk.michal.sovcik.chefsrecipies.MainActivity
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.DishType
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Recipe
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.theme.ChefsRecipiesTheme
@@ -73,7 +52,7 @@ fun RecipeCard(recipe: Recipe, modifier: Modifier, onClick: () -> Unit,height: D
 
 
     Card(
-        modifier = modifier
+        modifier = modifier.shadow(3.dp)
             .height(height)
             .width(width)
             .padding(10.dp),
@@ -105,7 +84,12 @@ fun RecipeCard(recipe: Recipe, modifier: Modifier, onClick: () -> Unit,height: D
 }
 @RequiresApi(Build.VERSION_CODES.P)
 @Composable
-fun ImageWithChose(contentResolver: ContentResolver,modifier: Modifier = Modifier, bitmap: Bitmap?,onImgChose:(newPath:Bitmap?) -> Unit,contentDescription: String = "",isActive:Boolean,contentScale: ContentScale = ContentScale.FillBounds)
+fun ImageWithChose(contentResolver: ContentResolver,
+                   modifier: Modifier = Modifier,
+                   bitmap: Bitmap?,
+                   onImgChose:(newPath:Bitmap?) -> Unit,
+                   contentDescription: String = "",
+                   isActive:Boolean,contentScale: ContentScale = ContentScale.FillBounds)
 {
     var boolean by rememberSaveable {
         mutableStateOf(false)
@@ -122,7 +106,22 @@ fun ImageWithChose(contentResolver: ContentResolver,modifier: Modifier = Modifie
             onImgChose(null)
         }
     )
+    var tempUri: Uri? = null
+    var cameraPickerActivity = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+        onResult = {
+            if (it) {
 
+                val decoder = tempUri?.let { it1 ->
+                    ImageDecoder.createSource(contentResolver,
+                        it1
+                    )
+                }
+                onImgChose(decoder?.let { it1 -> ImageDecoder.decodeBitmap(it1) })
+            }
+            onImgChose(null)
+        }
+    )
 
 
     Box(modifier = modifier )
@@ -148,6 +147,7 @@ fun ImageWithChose(contentResolver: ContentResolver,modifier: Modifier = Modifie
                     })
                     DropdownMenuItem(text = { Text(text = "Take photo...") }, onClick = {
                     /*TODO*/
+                        cameraPickerActivity.launch(tempUri)
                         boolean = false})
 
                 }

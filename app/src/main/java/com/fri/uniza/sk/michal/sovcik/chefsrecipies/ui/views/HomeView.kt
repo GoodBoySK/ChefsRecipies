@@ -1,8 +1,6 @@
 package com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.views
 
 import android.annotation.SuppressLint
-import android.graphics.Point
-import android.graphics.PointF
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -18,15 +16,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.material3.*
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PointMode.Companion.Polygon
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.asComposePath
 import androidx.compose.ui.graphics.drawscope.rotate
@@ -39,23 +34,16 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.plus
-import androidx.graphics.shapes.PointTransformer
 import androidx.graphics.shapes.RoundedPolygon
 import androidx.graphics.shapes.toPath
-import androidx.graphics.shapes.transformed
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.R
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.DishType
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Recipe
-import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.AppDatabase
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.Views
-import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.FilteredRecipes
-import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.offline.OfflineRecipeRepositary
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.UIModels.FilteredRecipes
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.preview.PreviewRecipeRepositary
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.theme.ChefsRecipiesTheme
-import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.viewmodels.HomeViewModel
-import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.viewmodels.HomeViewModelFactory
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 

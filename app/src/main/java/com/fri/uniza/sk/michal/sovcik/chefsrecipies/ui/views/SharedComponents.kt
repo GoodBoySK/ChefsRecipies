@@ -2,6 +2,7 @@ package com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.views
 
 import android.content.ContentResolver
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
@@ -10,18 +11,23 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -33,8 +39,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.KeyboardType
@@ -42,6 +51,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.R
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.DishType
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Recipe
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.theme.ChefsRecipiesTheme
@@ -52,7 +62,8 @@ fun RecipeCard(recipe: Recipe, modifier: Modifier, onClick: () -> Unit,height: D
 
 
     Card(
-        modifier = modifier.shadow(3.dp)
+        modifier = modifier
+            .shadow(3.dp)
             .height(height)
             .width(width)
             .padding(10.dp),
@@ -89,7 +100,7 @@ fun ImageWithChose(contentResolver: ContentResolver,
                    bitmap: Bitmap?,
                    onImgChose:(newPath:Bitmap?) -> Unit,
                    contentDescription: String = "",
-                   isActive:Boolean,contentScale: ContentScale = ContentScale.FillBounds)
+                   editable:Boolean, contentScale: ContentScale = ContentScale.Crop)
 {
     var boolean by rememberSaveable {
         mutableStateOf(false)
@@ -127,27 +138,54 @@ fun ImageWithChose(contentResolver: ContentResolver,
     Box(modifier = modifier )
     {
         bitmap?.let {
-            Image(
-                bitmap = it.asImageBitmap(),
-                contentDescription = contentDescription,
-                contentScale = contentScale,
-                modifier =  Modifier.fillMaxSize()
-            )
-        }
-        if (bitmap == null && isActive) {
+            Column {
+                Image(
+                    bitmap = it.asImageBitmap(),
+                    contentDescription = contentDescription,
+                    contentScale = contentScale,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable { boolean = true }
+                )
+                if (editable) {
+                    DropdownMenu(expanded = boolean, onDismissRequest = { boolean = false }) {
+                        DropdownMenuItem(
+                            text = { Text(text = stringResource(R.string.from_galery)) },
+                            onClick = {
+                                imagePickerActivity.launch(
+                                    PickVisualMediaRequest(
+                                        ActivityResultContracts.PickVisualMedia.ImageOnly
+                                    )
+                                )
+                                boolean = false
+                            })
+                        DropdownMenuItem(
+                            text = { Text(text = stringResource(R.string.take_photo)) },
+                            onClick = {
+                                /*TODO*/
+                                //cameraPickerActivity.launch(tempUri)
+                                boolean = false
+                            })
 
-            Column (modifier = Modifier.align(Alignment.Center)){
+                    }
+                }
+            }
+        }
+        if (bitmap == null && editable) {
+
+            Column (modifier = Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally){
+                Icon(Icons.Filled.Image, contentDescription = "image",modifier = Modifier.size(60.dp,60.dp), tint = Color.Gray)
                 Button(onClick = { boolean = true }) {
-                    Text(text = "Add Image")
+                    Text(text = stringResource(R.string.add_image))
                 }
                 DropdownMenu(expanded = boolean, onDismissRequest = { boolean = false }) {
-                    DropdownMenuItem(text = { Text(text = "From galery...") }, onClick = {
+                    DropdownMenuItem(text = { Text(text = stringResource(R.string.from_galery)) }, onClick = {
                         imagePickerActivity.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                         boolean = false
                     })
-                    DropdownMenuItem(text = { Text(text = "Take photo...") }, onClick = {
+                    DropdownMenuItem(text = { Text(text = stringResource(R.string.take_photo)) }, onClick = {
                     /*TODO*/
-                        cameraPickerActivity.launch(tempUri)
+                        //cameraPickerActivity.launch(tempUri)
                         boolean = false})
 
                 }
@@ -218,7 +256,7 @@ fun DecimalTextField(number: String,modifier: Modifier = Modifier,enabled: Boole
 @Composable
 private fun ImagePreview() {
     ChefsRecipiesTheme {
-//        ImageWithChose(contentResolver = ContentResolver,bitmap = null, onImgChose = {}, isActive = true)
+        ImageWithChose(contentResolver = LocalContext.current.contentResolver,bitmap = null, onImgChose = {}, editable = true)
     }
 }
 

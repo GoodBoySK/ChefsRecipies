@@ -60,6 +60,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -75,6 +76,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -93,6 +96,8 @@ import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositari
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.preview.PreviewInstructuinRepositary
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.preview.PreviewRecipeRepositary
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.viewmodels.RecipeViewModelFactory
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 enum class DetailViewParts {
     Desctiption,
@@ -212,7 +217,7 @@ fun RecipeDetailView(modifier: Modifier = Modifier, viewModel: RecipeDetailViewM
                             viewModel.editRecipe(newRecipe)
                         }
                     },
-                    isActive = uiState.isEditable
+                    editable = uiState.isEditable
                 )
             }
             //This is tabs in midle of screen
@@ -383,7 +388,7 @@ private fun InstructionBox(
                     if (it != null)
                         viewModel.editInstruction(instruction.copy(bitmap = it), index)
                 },
-                isActive = uiState.isEditable,
+                editable = uiState.isEditable,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
@@ -711,10 +716,21 @@ private fun RecipeDetailPreview() {
     val repoIng = PreviewIngredientsRepositary()
     val repoIns = PreviewInstructuinRepositary()
 
+    val dataStorePreferences: DataStore<Preferences> = remember{
+        object : DataStore<Preferences> {
+            override val data: Flow<Preferences>
+                get() = flowOf()
 
+            override suspend fun updateData(transform: suspend (t: Preferences) -> Preferences): Preferences {
+                TODO("Not yet implemented")
+            }
+
+        }
+
+    }
     val viewModel = viewModel<RecipeDetailViewModel>(
         factory = RecipeViewModelFactory(
-            repository = repo,repoIng,repoIns, NavController(LocalContext.current),1, LocalContext.current
+            repository = repo,repoIng,repoIns, NavController(LocalContext.current),1, LocalContext.current,dataStorePreferences
         )
     )
     viewModel.updateUIState(DetailViewState(isEditable = true,menuShown = false,"",1))

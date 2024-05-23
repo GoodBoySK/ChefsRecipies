@@ -7,4 +7,7 @@
     <string name="recipenameplaceholder">RecipeName</string>
     <string name="themeratureUnits">C</string>
     <string name="timeUnitShortcut">min</string>
+    <string name="add_image">Add Image</string>
+    <string name="from_galery">From galery...</string>
+    <string name="take_photo">Take photo...</string>
 </resources>

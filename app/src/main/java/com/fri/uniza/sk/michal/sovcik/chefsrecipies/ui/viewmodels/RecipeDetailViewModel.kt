@@ -6,6 +6,8 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.net.Uri
 import android.os.IBinder
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -32,7 +34,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 
-class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredientRepositary: IngredientRepositary, val instructionRepositary: InstructionRepositary,private val navController: NavController,private var id: Long,val context: Context) : ViewModel() {
+class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredientRepositary: IngredientRepositary, val instructionRepositary: InstructionRepositary, private val navController: NavController, private var id: Long, val pref: DataStore<Preferences>, val context: Context) : ViewModel() {
 
     private var _uiState = MutableStateFlow(DetailViewState(false,false,"",0))
     val uiState = _uiState.asStateFlow()
@@ -279,11 +281,11 @@ class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredie
         isTimerActive.value = false
     }
 }
-class RecipeViewModelFactory(private val repository: RecipeRepositary, private val ingredientRepositary: IngredientRepositary,val instructionRepositary: InstructionRepositary ,private val navController: NavController,private val recipeId: Long,val context: Context) : ViewModelProvider.Factory {
+class RecipeViewModelFactory(private val repository: RecipeRepositary, private val ingredientRepositary: IngredientRepositary,val instructionRepositary: InstructionRepositary ,private val navController: NavController,private val recipeId: Long,val context: Context, private val pref:DataStore<Preferences>) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(RecipeDetailViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return RecipeDetailViewModel(repository,ingredientRepositary,instructionRepositary,navController,recipeId, context) as T
+            return RecipeDetailViewModel(repository,ingredientRepositary,instructionRepositary,navController,recipeId, pref,context) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

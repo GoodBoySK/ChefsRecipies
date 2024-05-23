@@ -1,4 +1,4 @@
-package com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries
+package com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.UIModels
 
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Recipe
 

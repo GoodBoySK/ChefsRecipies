@@ -1,40 +1,27 @@
-@file:OptIn(ExperimentalFoundationApi::class)
+@file:OptIn(ExperimentalFoundationApi::class, ExperimentalFoundationApi::class)
 
 package com.fri.uniza.sk.michal.sovcik.chefsrecipies
 
 import android.Manifest
-import android.app.Activity
-import android.app.Application
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.preference.PreferenceDataStore
-import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
 
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddBox
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.Person
@@ -48,35 +35,27 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.preferencesDataStoreFile
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import androidx.test.core.app.ApplicationProvider
-import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.DishType
-import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Recipe
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.AppDatabase
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.Views
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.offline.OfflineIngredinetRepositary
@@ -89,16 +68,18 @@ import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.viewmodels.RecipeDetailVi
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.viewmodels.RecipeViewModelFactory
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.viewmodels.SearchViewModel
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.viewmodels.SearchViewModelFactory
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.viewmodels.UserInfoViewModel
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.viewmodels.UserInfoViewModelFactory
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.views.HomeView
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.views.ImportView
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.views.RecipeDetailView
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.views.SearchView
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.views.UserInfoView
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
+
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalFoundationApi::class)
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -114,7 +95,7 @@ class MainActivity : ComponentActivity() {
 
 
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    Navigation()
+                    Navigation((this.application as App).dataStorePreferences)
                 }
             }
         }
@@ -124,7 +105,7 @@ class MainActivity : ComponentActivity() {
 @ExperimentalFoundationApi
 @RequiresApi(Build.VERSION_CODES.P)
 @Composable
-fun Navigation() {
+fun Navigation(dataStorePreferences: DataStore<Preferences>) {
     val navControler = rememberNavController()
     val primaryColor = MaterialTheme.colorScheme.primary
 
@@ -175,7 +156,8 @@ fun Navigation() {
 
 
                 val viewModel = viewModel<RecipeDetailViewModel>(factory = RecipeViewModelFactory(
-                    offlineRecipeRepo,offlineIngredientRepo,offlineInstructionRepo,navControler,it.arguments?.getLong("recipeId") ?: 0,context = context))
+                    offlineRecipeRepo,offlineIngredientRepo,offlineInstructionRepo,navControler,
+                    it.arguments?.getLong("recipeId") ?: 0,context = context, pref = dataStorePreferences))
 
 
 
@@ -183,12 +165,11 @@ fun Navigation() {
                      viewModel = viewModel)
             }
             composable(route = Views.IMPORT.name) {
-                val context = LocalContext
                 ImportView()
             }
             composable(route = Views.USERINFO.name) {
-                val context = LocalContext
-                UserInfoView()
+                val viewModel = viewModel<UserInfoViewModel>(factory = UserInfoViewModelFactory(dataStorePreferences, appContext = LocalContext.current))
+                UserInfoView(viewModel = viewModel)
             }
         }
         NavigationBar(modifier = Modifier
@@ -240,10 +221,22 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun NavPreview() {
+    val dataStorePreferences: DataStore<Preferences> = remember{
+        object : DataStore<Preferences>{
+            override val data: Flow<Preferences>
+                get() = flowOf()
+
+            override suspend fun updateData(transform: suspend (t: Preferences) -> Preferences): Preferences {
+                TODO("Not yet implemented")
+            }
+
+        }
+
+    }
     val db = AppDatabase.getDatabase(LocalContext.current)
     ChefsRecipiesTheme {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            Navigation()
+            Navigation(dataStorePreferences)
         }
     }
 }

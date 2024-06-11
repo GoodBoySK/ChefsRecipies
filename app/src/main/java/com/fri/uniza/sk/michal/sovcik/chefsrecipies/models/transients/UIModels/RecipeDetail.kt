@@ -13,7 +13,7 @@ data class RecipeDetail(
     val rating: String = "",
     val autor: String = "",
     val description: String = "",
-    val bitmap: Bitmap? = null
+
 ){
     fun toData() : Recipe = Recipe(
         id = id,
@@ -24,7 +24,8 @@ data class RecipeDetail(
         rating = rating.toFloatOrNull() ?: 0.0f,
         autor = autor,
         description = description,
-        bitmap = bitmap
+
+
     )
 
 }
@@ -38,5 +39,5 @@ fun Recipe.toUI():RecipeDetail = RecipeDetail(
     rating = rating.toString(),
     autor = autor,
     description = description,
-    bitmap = bitmap
+
 )

@@ -69,12 +69,12 @@ fun UserInfoView(modifier: Modifier = Modifier, viewModel: UserInfoViewModel)
             ) {
                 Box (modifier = Modifier.height(100.dp).width(100.dp).clip(CircleShape)) {
                     ImageWithChose(modifier = Modifier,
-                        contentResolver = LocalContext.current.contentResolver,
-                        bitmap = pic,
-                        onImgChose = {
-                            if (it != null) viewModel.saveProfilePicture(localContext, it)
+                        context = LocalContext.current,
+                        onImgChose = {bit,path ->
+                            if (bit != null) viewModel.saveProfilePicture(localContext, bit)
                         },
-                        editable = true
+                        editable = true,
+                        path = "profile.png"
                     )
                 }
                 BasicTextField(modifier = Modifier.align(Alignment.CenterHorizontally),

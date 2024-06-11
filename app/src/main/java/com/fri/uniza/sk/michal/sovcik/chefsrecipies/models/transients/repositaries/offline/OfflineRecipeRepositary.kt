@@ -4,12 +4,16 @@ import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.DishType
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Ingredient
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Recipe
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Tag
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.daos.IngredientDao
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.daos.InstructionDao
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.daos.RecipeDao
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.daos.TagDao
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.interfaceRepositaries.RecipeRepositary
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.forEach
 
-class OfflineRecipeRepositary(private val recipeDao:RecipeDao, private val tagDao: TagDao) : RecipeRepositary {
+class OfflineRecipeRepositary(private val recipeDao:RecipeDao, private val tagDao: TagDao, private  val ingredientDao: IngredientDao, private val instructionDao: InstructionDao) : RecipeRepositary {
     override fun getAllRecipiesStream(): Flow<List<Recipe>> {
         return recipeDao.getAllRecipies()
     }
@@ -50,6 +54,25 @@ class OfflineRecipeRepositary(private val recipeDao:RecipeDao, private val tagDa
     }
 
     override suspend fun deleteRecipe(recipe: Recipe) {
+
+        tagDao.getTags(recipe.id).first{
+            it.forEach {
+                tagDao.delete(it)
+            }
+            true
+        }
+        ingredientDao.getIngrendience(recipe.id).first{
+            it.forEach {
+                ingredientDao.delete(it)
+            }
+            true
+        }
+        instructionDao.getInstructions(recipe.id).first{
+            it.forEach {
+                instructionDao.delete(it)
+            }
+            true
+        }
         recipeDao.delete(recipe)
     }
 

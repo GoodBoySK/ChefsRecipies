@@ -121,20 +121,29 @@ fun Navigation(dataStorePreferences: DataStore<Preferences>) {
                 .weight(1f)) {
             composable(route = Views.HOME.name) {
                 val context = LocalContext
-                val viewModel =  viewModel<HomeViewModel>(factory = HomeViewModelFactory(
-                    OfflineRecipeRepositary(
-                        AppDatabase.getDatabase(
-                            LocalContext.current).recipeDao(),AppDatabase.getDatabase(LocalContext.current).tagDao())
+                val viewModel =  viewModel<HomeViewModel>(
+                    factory = HomeViewModelFactory(
+                        OfflineRecipeRepositary(
+                            AppDatabase.getDatabase(LocalContext.current)
+                                .recipeDao(),
+                            AppDatabase.getDatabase(LocalContext.current).tagDao(),
+                            AppDatabase.getDatabase(LocalContext.current).ingredientDao(),
+                            AppDatabase.getDatabase(LocalContext.current).instructionDao()
+                        )
+                    )
                 )
-                )
-                HomeView(navController = navControler,state =  viewModel.recipesFilter.collectAsState())
+                HomeView(navController = navControler, viewModel =viewModel)
             }
             composable(route = Views.SEARCH.name) {
                 val context = LocalContext
                 val viewModel = viewModel<SearchViewModel>(
-                    factory = SearchViewModelFactory(repository =  OfflineRecipeRepositary(AppDatabase.getDatabase(
-                        LocalContext.current).recipeDao(),AppDatabase.getDatabase(
-                        LocalContext.current).tagDao()),
+                    factory = SearchViewModelFactory(
+                        repository =  OfflineRecipeRepositary(AppDatabase.getDatabase(
+                            LocalContext.current).recipeDao(),AppDatabase.getDatabase(
+                            LocalContext.current).tagDao(),
+                            AppDatabase.getDatabase(LocalContext.current).ingredientDao(),
+                            AppDatabase.getDatabase(LocalContext.current).instructionDao()
+                        ),
                         OfflineIngredinetRepositary(AppDatabase.getDatabase(LocalContext.current).ingredientDao()))
                 )
                 SearchView(viewModel = viewModel, goToDetail =  {
@@ -147,17 +156,27 @@ fun Navigation(dataStorePreferences: DataStore<Preferences>) {
                     nullable = false
                 })) {
                 val context = LocalContext.current
-                val offlineRecipeRepo = OfflineRecipeRepositary(AppDatabase.getDatabase(
-                    LocalContext.current).recipeDao(),AppDatabase.getDatabase(LocalContext.current).tagDao())
+                val offlineRecipeRepo = OfflineRecipeRepositary(
+                    AppDatabase.getDatabase(LocalContext.current).recipeDao(),
+                    AppDatabase.getDatabase(LocalContext.current).tagDao(),
+                    AppDatabase.getDatabase(LocalContext.current).ingredientDao(),
+                    AppDatabase.getDatabase(LocalContext.current).instructionDao()
+                )
                 val offlineInstructionRepo = OfflineInstructionRepositary(AppDatabase.getDatabase(
                     LocalContext.current).instructionDao())
                 val offlineIngredientRepo = OfflineIngredinetRepositary(AppDatabase.getDatabase(
                     LocalContext.current).ingredientDao())
 
 
-                val viewModel = viewModel<RecipeDetailViewModel>(factory = RecipeViewModelFactory(
-                    offlineRecipeRepo,offlineIngredientRepo,offlineInstructionRepo,navControler,
-                    it.arguments?.getLong("recipeId") ?: 0,context = context, pref = dataStorePreferences))
+                val viewModel = viewModel<RecipeDetailViewModel>(
+                    factory = RecipeViewModelFactory(
+                        offlineRecipeRepo,
+                        offlineIngredientRepo,
+                        offlineInstructionRepo,
+                        navControler,
+                    it.arguments?.getLong("recipeId") ?: 0,
+                        context = context,
+                        pref = dataStorePreferences))
 
 
 

@@ -10,7 +10,7 @@ data class InstructionDetail(
     val temperature:String = "",
     val stopTime:String = "",//mins
     val recipeId: Long = 0,
-    val bitmap: Bitmap? = null
+
 ){
     fun toData():Instruction = Instruction(
         id = id,
@@ -19,7 +19,7 @@ data class InstructionDetail(
         temperature = temperature.toIntOrNull() ?: 0,
         stopTime = stopTime.toFloatOrNull() ?: 0.0f,
         recipeId = recipeId,
-        bitmap = bitmap
+
     )
 }
 fun Instruction.toUI():InstructionDetail = InstructionDetail(
@@ -29,5 +29,6 @@ fun Instruction.toUI():InstructionDetail = InstructionDetail(
     temperature = temperature.toString(),
     stopTime = stopTime.toString(),
     recipeId = recipeId,
-    bitmap = bitmap
+
+
 )

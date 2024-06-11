@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -98,6 +99,7 @@ import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositari
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.viewmodels.RecipeViewModelFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import java.io.File
 
 enum class DetailViewParts {
     Desctiption,
@@ -127,7 +129,10 @@ fun RecipeDetailView(modifier: Modifier = Modifier, viewModel: RecipeDetailViewM
     val instructions by viewModel.instructionState.collectAsState()
     val tags by viewModel.tagState.collectAsState()
 
+    val recipePersistant by viewModel.recipePersistant.collectAsState()
+
     val context = LocalContext.current;
+
     Box {
         //Back FloatingButtpn
         Column (
@@ -203,21 +208,13 @@ fun RecipeDetailView(modifier: Modifier = Modifier, viewModel: RecipeDetailViewM
             //This is Image
             item {
                 ImageWithChose(
-                    LocalContext.current.contentResolver,
+                    LocalContext.current,
                     modifier = Modifier
                         .height(400.dp)
                         .fillMaxWidth()
                         .fillMaxHeight(),
-                        bitmap =  recipe.bitmap,
-                    onImgChose =
-                    {
-                        if (it != null){
-
-                            var newRecipe = recipe.copy(bitmap = it)
-                            viewModel.editRecipe(newRecipe)
-                        }
-                    },
-                    editable = uiState.isEditable
+                    editable = uiState.isEditable,
+                    path = recipePersistant.name + "/main.png"
                 )
             }
             //This is tabs in midle of screen
@@ -279,12 +276,16 @@ fun RecipeDetailView(modifier: Modifier = Modifier, viewModel: RecipeDetailViewM
                                 viewModel,
                                 index,
                                 uiState,
-                                context,
-
+                                recipePersistant.name
                             )
                         }
-                        Button(onClick = { viewModel.addInstruction(InstructionDetail()) }) {
-                            Text(text = "Add instruction...", fontStyle = FontStyle.Italic)
+                        if (uiState.isEditable) {
+                            Button(onClick = { viewModel.addInstruction(InstructionDetail()) }) {
+                                Text(
+                                    text = "Add instruction...",
+                                    fontStyle = FontStyle.Italic,
+                                    )
+                            }
                         }
                     }
 
@@ -306,8 +307,7 @@ private fun InstructionBox(
     viewModel: RecipeDetailViewModel,
     index: Int,
     uiState: DetailViewState,
-    context: Context,
-
+    recipeName: String
 ) {
     Column(
         modifier = Modifier
@@ -323,8 +323,20 @@ private fun InstructionBox(
                     viewModel.editInstruction(instruction.copy(text = it), index)
                 },
                 enabled = uiState.isEditable,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.weight(1f)
             )
+            if (uiState.isEditable)
+            {
+                IconButton(
+                    onClick = { viewModel.removeInstruction(instruction) },
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .width(20.dp)
+                )
+                {
+                    Icon(Icons.Filled.Close, contentDescription = "Close")
+                }
+            }
         }
 
         Row(
@@ -339,9 +351,12 @@ private fun InstructionBox(
             {
                 val isTimerActive by viewModel.isTimerActive.collectAsState()
 
-                NumberTextField(number = if(!isTimerActive)instruction.stopTime else viewModel.minutes.toString(), onValueChange = {
-                    viewModel.editInstruction(instruction.copy(stopTime = it), index)
-                },
+                DecimalTextField(
+                    number = if(!isTimerActive || index != viewModel.timerIngredienceIndex.collectAsState().value)instruction.stopTime
+                    else viewModel.minutes.toString(),
+                    onValueChange = {
+                        viewModel.editInstruction(instruction.copy(stopTime = it), index)
+                    },
                     enabled = uiState.isEditable,
                     prefix = { Icon(Icons.Filled.Timelapse, contentDescription = "Clock") },
                     suffix = { Text(text = stringResource(R.string.timeUnitShortcut)) },
@@ -350,7 +365,7 @@ private fun InstructionBox(
                             //TODO start timer
                             if (isTimerActive) viewModel.stopTimer()
                             else viewModel.startNewTimer(
-                                instruction.toData().stopTime.toInt(),
+                                instruction.toData().stopTime,
 
                                 index
                             )
@@ -380,14 +395,10 @@ private fun InstructionBox(
 
 
         }
-        if (!(!uiState.isEditable && (instruction.bitmap == null || instruction.bitmap.byteCount == 0))) {
+        val file = File(LocalContext.current.filesDir.path ,recipeName + "/" + instruction.id.toString() + ".png")
+        if (!(!uiState.isEditable && !file.exists())) {
             ImageWithChose(
-                contentResolver = LocalContext.current.contentResolver,
-                bitmap = instruction.bitmap,
-                onImgChose = {
-                    if (it != null)
-                        viewModel.editInstruction(instruction.copy(bitmap = it), index)
-                },
+                context = LocalContext.current,
                 editable = uiState.isEditable,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -395,10 +406,13 @@ private fun InstructionBox(
                     .padding(20.dp, 10.dp)
                     .background(
                         Color.LightGray
-                    )
+                    ),
+                path = recipeName +"/" +instruction.id + ".png"
+
 
             )
         }
+
     }
 }
 
@@ -438,7 +452,7 @@ private fun DetailViewIngredient(
                     .padding(10.dp)
                     .weight(1f),
                 suffix = {
-                    Text(text = "portions")
+                    Text(text = stringResource(R.string.portions))
                 }
 
             )
@@ -518,7 +532,7 @@ private fun DetailViewIngredient(
         }
         if (uiState.isEditable) {
             Button(onClick = { viewModel.addIngredients(IngredientDetail()) }) {
-                Text(text = "Add ingredient...", fontStyle = FontStyle.Italic)
+                Text(text = stringResource(R.string.add_ingredient), fontStyle = FontStyle.Italic)
             }
         }
     }
@@ -597,7 +611,7 @@ private fun DetailViewDetail(
                 ExposedDropdownMenu(
                     expanded = uiState.dishTypeShowed,
                     onDismissRequest = { viewModel.updateUIState(uiState.copy(dishTypeShowed = false)) }) {
-                    DishType.values().forEach {
+                    DishType.entries.forEach {
                         DropdownMenuItem(text = { Text(it.name) },
                             onClick = {
                                 viewModel.editRecipe(recipe.copy(dishType = it))
@@ -671,13 +685,14 @@ private fun DetailViewDetail(
                             })
                         ) {
                             if (uiState.newTagText == "") {
-                                Text(text = "AddText...", color = Color.White)
+                                Text(text = stringResource(R.string.addtext), color = Color.White)
                             } else {
                                 Text(text = uiState.newTagText, color = Color.White)
                             }
                         }
 
                         Spacer(modifier = Modifier.width(10.dp))
+
                         Icon(
                             Icons.Filled.Add,
                             modifier = Modifier.clickable {
@@ -733,7 +748,7 @@ private fun RecipeDetailPreview() {
             repository = repo,repoIng,repoIns, NavController(LocalContext.current),1, LocalContext.current,dataStorePreferences
         )
     )
-    viewModel.updateUIState(DetailViewState(isEditable = true,menuShown = false,"",1))
+    viewModel.updateUIState(DetailViewState(isEditable = true,menuShown = false,"",2))
     ChefsRecipiesTheme {
         RecipeDetailView(
             viewModel = viewModel

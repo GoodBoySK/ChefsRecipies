@@ -26,7 +26,6 @@ data class Recipe(
     val rating: Float = 0f,
     val autor: String = "",
     val description: String = "",
-    val bitmap: Bitmap? = null
     )
 
 
@@ -42,6 +41,7 @@ data class TagsOfRecipe(
     @Relation(
         parentColumn = "id",
         entityColumn = "recipeId"
+
     )
     val ingredients: List<Tag>
 )

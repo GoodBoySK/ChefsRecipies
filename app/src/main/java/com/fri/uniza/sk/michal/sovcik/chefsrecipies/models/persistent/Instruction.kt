@@ -15,7 +15,6 @@ data class Instruction(
     val temperature:Int,
     val stopTime:Float,//mins
     val recipeId: Long,
-    val bitmap: Bitmap?
 )
 
 data class InstructionsOfRecipe(

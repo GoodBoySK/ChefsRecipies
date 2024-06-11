@@ -11,7 +11,7 @@ class PreviewInstructuinRepositary : InstructionRepositary {
     private val list:MutableList<Instruction> = mutableListOf()
 
     init {
-        list.add(Instruction(1,1,"This is first step of recipe",180,60f,1,null))
+        list.add(Instruction(1,1,"This is first step of recipe",180,60f,1))
     }
     override suspend fun insert(item: Instruction):Long {
         list.add(item)

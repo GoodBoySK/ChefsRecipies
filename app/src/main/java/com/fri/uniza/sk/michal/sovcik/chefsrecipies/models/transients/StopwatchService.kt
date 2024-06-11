@@ -20,8 +20,8 @@ class StopwatchService : Service() {
 
     private val binder = LocalBinder()
     private var job: Job? = null
-    private var _minutes:MutableStateFlow<Int> = MutableStateFlow<Int>(0)
-    val minutes = _minutes.asStateFlow()
+    private var _seconds:MutableStateFlow<Int> = MutableStateFlow<Int>(0)
+    val seconds = _seconds.asStateFlow()
     companion object{
         val TIMEKEY = "time"
     }
@@ -50,15 +50,15 @@ class StopwatchService : Service() {
             Actions.START.toString() -> {
 
                 time?.let {
-                    _minutes.value = it
+                    _seconds.value = it
                     start(getTime(it),false)
                     job = CoroutineScope(Dispatchers.Main).launch{
-                        while (isActive && _minutes.value != 0) {
+                        while (isActive && _seconds.value != 0) {
                             delay(1000)
-                            _minutes.value--
-                            start(getTime( _minutes.value),false)
+                            _seconds.value--
+                            start(getTime( _seconds.value),false)
                         }
-                        start(getTime(_minutes.value), true)
+                        start(getTime(_seconds.value), true)
                     }
                 }
             }

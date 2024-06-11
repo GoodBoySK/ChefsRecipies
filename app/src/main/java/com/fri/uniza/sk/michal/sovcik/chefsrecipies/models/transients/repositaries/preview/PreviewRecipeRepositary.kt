@@ -12,7 +12,7 @@ class PreviewRecipeRepositary : RecipeRepositary{
     private val list:MutableList<Recipe> = mutableListOf()
     private val tagList:MutableList<Tag> = mutableListOf()
     init {
-        list.add(Recipe(1,"Cookies",DishType.Dezert,30,15,4.5f,"Michal","This cookies will blow you mind!!!!",null))
+        list.add(Recipe(1,"Cookies",DishType.Dezert,30,15,4.5f,"Michal","This cookies will blow you mind!!!!"))
         tagList.add(Tag(1,1, "Sugar"))
         tagList.add(Tag(2,1, "Milk"))
         tagList.add(Tag(3,1, "Sweat"))

@@ -27,11 +27,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import java.io.File
 
 
 class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredientRepositary: IngredientRepositary, val instructionRepositary: InstructionRepositary, private val navController: NavController, private var id: Long, val pref: DataStore<Preferences>, val context: Context) : ViewModel() {
@@ -52,6 +52,7 @@ class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredie
     }
 
     val recipeFlow = recipeRepositary.getRecipe(id)
+    val recipePersistant = recipeRepositary.getRecipe(id).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), Recipe())
     //Get data from database -> cast them to new object so new instance is created -> load it
     private var _recipeState = MutableStateFlow(RecipeDetail())
     val recipeState:StateFlow<RecipeDetail> = _recipeState.asStateFlow()
@@ -84,7 +85,15 @@ class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredie
     init {
         viewModelScope.launch {
             instructionFlow.collect{list ->
-                _instructionState.value = list.map { it.toUI() }
+                _instructionState.value = list.map {
+                    var uiItem = it.toUI()
+                    val alreadyInList = instructionState.value.getOrNull(instructionState.value.indexOfFirst {item -> item.id == uiItem.id  })
+                    if (alreadyInList != null)
+                        uiItem = alreadyInList
+
+                    uiItem
+
+                }
 
             }
         }
@@ -109,25 +118,34 @@ class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredie
 
     fun editRecipe(recipe: RecipeDetail) {
 
+
         if (uiState.value.isEditable)
             _recipeState.value = recipe
+
     }
     fun saveRecipe() {
         //This will work bcs if there is existing entry it will get updated bcs of on conflictstrategy set in every dao
+        renameFolder(recipePersistant.value.name, recipeState.value.name)
         viewModelScope.launch() {
-            recipeRepositary.updateRecipe(_recipeState.value.toData())
-
+            val copyIngredienece = _ingredientsState.value.toList()
+            val copyInstruction = _instructionState.value.toList()
+            val copyTag = _tagsState.value.toList()
 
             //_recipeState.value = a
-            _ingredientsState.value.forEach {
+            copyIngredienece.forEachIndexed { _, it->
                 ingredientRepositary.insert(it.toData())
             }
-            _instructionState.value.forEach {
+            copyInstruction.forEachIndexed { _, it ->
                 instructionRepositary.insert(it.toData())
             }
-            _tagsState.value.forEach {
+            copyTag.forEachIndexed { _, it ->
                 recipeRepositary.insertTag(it)
             }
+            _ingredientsState.value = emptyList()
+            _instructionState.value = emptyList()
+            _tagsState.value = emptyList()
+            recipeRepositary.updateRecipe(_recipeState.value.toData())
+
         }
 
     }
@@ -166,6 +184,16 @@ class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredie
     }
     fun navigateBack() {
         navController.popBackStack()
+        viewModelScope.launch {
+            recipeFlow.first {
+                if (it.name != recipeState.value.name)
+                {
+                    renameFolder(recipeState.value.name, it.name)
+                }
+
+                true
+            }
+        }
     }
     fun addTag(tag: Tag) {
         var list = tagState.value.toMutableList()
@@ -177,6 +205,9 @@ class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredie
         var list = tagState.value.toMutableList()
         list.remove(tag)
         _tagsState.value = list.toList()
+        viewModelScope.launch{
+            recipeRepositary.deleteTag(tag)
+        }
 
     }
     fun recalculateIngredients(newPortions: Int) {
@@ -184,7 +215,7 @@ class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredie
         val p = newPortions.toFloat() / data.portions
         _recipeState.value = recipeState.value.copy(portions = newPortions.toString())
         _ingredientsState.value = _ingredientsState.value.map {
-            it.copy(amount = (Math.round(it.amount.toFloat() * p * 1000) / 1000f).toString())
+            it.copy(amount = (Math.round(it.amount.toFloat() * p * 100) / 100f).toString())
         }
     }
     fun editIngredients(ingredient: IngredientDetail, index:Int){
@@ -196,10 +227,10 @@ class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredie
     }
     fun addIngredients(ingredient: IngredientDetail) {
         if (uiState.value.isEditable) {
-                var newIngre = ingredient.copy( recipeId = recipeState.value.id)
-                var list = ingredientsState.value.toMutableList()
-                list.add(newIngre)
-                _ingredientsState.value = list.toList()
+            var newIngre = ingredient.copy( recipeId = recipeState.value.id)
+            var list = ingredientsState.value.toMutableList()
+            list.add(newIngre)
+            _ingredientsState.value = list.toList()
 
         }
     }
@@ -208,14 +239,26 @@ class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredie
             var list = ingredientsState.value.toMutableList()
             list.remove(ingredient)
             _ingredientsState.value = list.toList()
+            viewModelScope.launch{
+                ingredientRepositary.delete(ingredient.toData())
+            }
         }
     }
     fun addInstruction(instruction: InstructionDetail) {
         if (uiState.value.isEditable) {
-                var newInstruction = instruction.copy(recipeId = recipeState.value.id, orderNum = instructionState.value.size + 1)
+            var newInstruction = instruction.copy(recipeId = recipeState.value.id, orderNum = instructionState.value.size + 1)
+            viewModelScope.launch{
+                val newId = instructionRepositary.insert(newInstruction.toData())
+                newInstruction = newInstruction.copy(id = newId);
                 var list = instructionState.value.toMutableList()
+
                 list.add(newInstruction)
                 _instructionState.value = list.toList()
+
+            }
+
+
+
         }
     }
     fun editInstruction(instruction: InstructionDetail,index: Int){
@@ -230,12 +273,29 @@ class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredie
             var list = instructionState.value.toMutableList()
             list.remove(instruction)
             list.forEachIndexed {index, instructionDetail ->
-                list.set(index, instructionDetail.copy(orderNum = index))
+                list.set(index, instructionDetail.copy(orderNum = index + 1))
             }
             _instructionState.value = list.toList()
+            viewModelScope.launch {
+                val file = File(context.filesDir, recipeState.value.name + "/" + instruction.id + ".png")
+                file.delete()
+                instructionRepositary.delete(instruction.toData())
+            }
         }
     }
+    fun renameFolder(path: String, newName: String)
+    {
+        var file = File(context.filesDir.path,path)
+        var newFile = File(context.filesDir.path,newName)
+        file.renameTo(newFile)
+    }
 
+    fun deleteFile(path:String)
+    {
+
+        var file = File(path)
+        file.delete()
+    }
     private var serviceInternt = Intent()
     private var totalSeconds = 1;
     var _percState: MutableStateFlow<Float> = MutableStateFlow(0f)
@@ -249,9 +309,12 @@ class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredie
             val binder = service as StopwatchService.LocalBinder
 
             viewModelScope.launch {
-                binder.getService().minutes.collect{
-                    minutes = it
+                binder.getService().seconds.collect{
+                    minutes = it / 60
                     _percState.value = (totalSeconds - it)/totalSeconds.toFloat()
+                    if (totalSeconds == it) {
+                        isTimerActive.value = false
+                    }
 
                 }
             }
@@ -262,10 +325,10 @@ class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredie
 
         }
     }
-    fun startNewTimer(timeMinutes:Int, index:Int) {
+    fun startNewTimer(timeMinutes:Float, index:Int) {
         serviceInternt = Intent(StopwatchService.Actions.START.toString(), Uri.EMPTY,context,StopwatchService::class.java)
-        serviceInternt.putExtra(StopwatchService.TIMEKEY,timeMinutes)
-        totalSeconds = timeMinutes;
+        serviceInternt.putExtra(StopwatchService.TIMEKEY,(timeMinutes * 60).toInt())
+        totalSeconds = (timeMinutes * 60).toInt()
         context.startService(serviceInternt)
         context.bindService(serviceInternt,connection,Context.BIND_AUTO_CREATE)
         timerIngredienceIndex.value = index

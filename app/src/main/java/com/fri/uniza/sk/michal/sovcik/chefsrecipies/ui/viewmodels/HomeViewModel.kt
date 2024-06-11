@@ -1,5 +1,6 @@
 package com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.viewmodels
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -13,6 +14,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import java.io.File
 
 class HomeViewModel(val recipeRepositary: RecipeRepositary) : ViewModel() {
     private val _recipesFilter:StateFlow<FilteredRecipes> = MutableStateFlow(FilteredRecipes())
@@ -47,8 +50,27 @@ class HomeViewModel(val recipeRepositary: RecipeRepositary) : ViewModel() {
         return recipies
     }
 
-}
+    fun deleteRecipe(recipe: Recipe, context: Context) {
+        viewModelScope.launch {
+            recipeRepositary.deleteRecipe(recipe)
+            deleteFolder(File( context.filesDir, recipe.name))
+        }
+    }
 
+}
+fun deleteFolder(file: File)
+{
+    recursiveDelete(file)
+}
+fun recursiveDelete(file: File){
+    if (file.isDirectory)
+    {
+        file.listFiles()?.forEach { _ ->
+            recursiveDelete(file)
+        }
+    }
+    file.delete();
+}
 class HomeViewModelFactory(private val repository: RecipeRepositary) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(HomeViewModel::class.java)) {

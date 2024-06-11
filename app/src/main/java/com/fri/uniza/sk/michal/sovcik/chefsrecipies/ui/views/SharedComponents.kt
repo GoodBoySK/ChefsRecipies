@@ -1,17 +1,25 @@
+@file:OptIn(ExperimentalFoundationApi::class)
+
 package com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.views
 
-import android.content.ContentResolver
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
+import android.provider.MediaStore
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,11 +42,11 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -51,58 +59,99 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.R
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.DishType
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Recipe
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.theme.ChefsRecipiesTheme
+import java.io.File
+import java.io.FileOutputStream
 
-@OptIn(ExperimentalMaterial3Api::class)
+fun loadBitMap(context: Context,path:String):Bitmap?
+{
+    val file = File(context.filesDir, path)
+    if (!file.exists())return null
+
+    return BitmapFactory.decodeFile(file.path)
+}
+fun saveImage(context: Context,path:String, bitmap: Bitmap):String
+{
+    val file = File(context.filesDir, path)
+    val parentDir = file.parentFile
+
+    if (parentDir != null && !parentDir.exists()) {
+        parentDir.mkdirs()
+    }
+    try {
+
+        var outputStream = FileOutputStream(file)
+        outputStream.use {
+            bitmap.compress(Bitmap.CompressFormat.PNG,100,outputStream)
+        }
+    }catch (e:Exception)
+    {
+        Log.e("Image saving","error at saving Image")
+    }
+    return context.filesDir.path + path
+}
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun RecipeCard(recipe: Recipe, modifier: Modifier, onClick: () -> Unit,height: Dp = 250.dp,width:Dp = 250.dp) {
-
+fun RecipeCard(recipe: Recipe, modifier: Modifier, onClick: () -> Unit,height: Dp = 250.dp,width:Dp = 250.dp, onRemove: () -> Unit = {}) {
+    var expandedDropDown by rememberSaveable {
+        mutableStateOf(false)
+    }
 
     Card(
         modifier = modifier
-            .shadow(3.dp)
+            //  .shadow(3.dp)
             .height(height)
             .width(width)
-            .padding(10.dp),
-        onClick = onClick
+            .padding(10.dp)
+            .combinedClickable(
+
+                onLongClick = {
+                    expandedDropDown = true
+                },
+                onClick = onClick),
+
     ){
        // Image(painter = , contentDescription = )
-        Column (
-
-
-        ){
+        Column {
             Box (
                 modifier = Modifier.weight(1f)
-
             ){
-                recipe.bitmap?.let {
-                    Image(bitmap = it.asImageBitmap(),
-                        contentDescription = "RecipePicture",
-                        contentScale = ContentScale.FillBounds,
-                        modifier = Modifier.fillMaxSize()
-                    )
+                val bitmap = loadBitMap(LocalContext.current,recipe.name + "/main.png")?.asImageBitmap()
+                if (bitmap != null) {
+                    Image(bitmap = bitmap,
+                    contentDescription = "RecipePicture",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize())
                 }
-
             }
             Text(text = recipe.name, fontSize = 20.sp)
             Text(text = recipe.autor, fontStyle = FontStyle.Italic)
         }
-
+        DropdownMenu(expanded = expandedDropDown, onDismissRequest = {expandedDropDown = false }) {
+            DropdownMenuItem(text = { Text(text = stringResource(R.string.delete)) }, onClick =
+                {
+                    onRemove()
+                    expandedDropDown = false
+                }
+            )
+        }
     }
 }
+
 @RequiresApi(Build.VERSION_CODES.P)
 @Composable
-fun ImageWithChose(contentResolver: ContentResolver,
+fun ImageWithChose(context: Context,
                    modifier: Modifier = Modifier,
-                   bitmap: Bitmap?,
-                   onImgChose:(newPath:Bitmap?) -> Unit,
+                    path: String,
+                   onImgChose:((newPath:Bitmap?, path:String) -> Unit)? =null,
                    contentDescription: String = "",
                    editable:Boolean, contentScale: ContentScale = ContentScale.Crop)
 {
-    var boolean by rememberSaveable {
+    var boolean by remember {
         mutableStateOf(false)
     }
 
@@ -111,36 +160,46 @@ fun ImageWithChose(contentResolver: ContentResolver,
         onResult = {
             if (it != null) {
 
-                val decoder = ImageDecoder.createSource(contentResolver,it)
-                onImgChose(ImageDecoder.decodeBitmap(decoder))
+                val decoder = ImageDecoder.createSource(context.contentResolver,it)
+                val bitmap = ImageDecoder.decodeBitmap(decoder)
+                saveImage(context,path, bitmap)
+                onImgChose?.invoke(ImageDecoder.decodeBitmap(decoder), it.path ?: "")
             }
-            onImgChose(null)
+            onImgChose?.invoke(null, "")
+            boolean = false
         }
     )
-    var tempUri: Uri? = null
-    var cameraPickerActivity = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture(),
-        onResult = {
-            if (it) {
+    var tempUri: Uri? by rememberSaveable {
+        mutableStateOf(null)
+    }
 
-                val decoder = tempUri?.let { it1 ->
-                    ImageDecoder.createSource(contentResolver,
-                        it1
-                    )
+    var cameraPickerActivity = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult(),
+        onResult = {result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data = tempUri?.let {
+                    val source = ImageDecoder.createSource(context.contentResolver, it)
+                    ImageDecoder.decodeBitmap(source)
                 }
-                onImgChose(decoder?.let { it1 -> ImageDecoder.decodeBitmap(it1) })
+                if (data != null) {
+                    saveImage(context, path, data)
+                }
+                onImgChose?.invoke(data, context.filesDir.path + path)
             }
-            onImgChose(null)
+            onImgChose?.invoke(null, "")
+            boolean = false
         }
+
     )
 
 
     Box(modifier = modifier )
     {
-        bitmap?.let {
+        val image = loadBitMap(LocalContext.current,path)?.asImageBitmap()
+        if (image != null){
             Column {
                 Image(
-                    bitmap = it.asImageBitmap(),
+                    bitmap = image,
                     contentDescription = contentDescription,
                     contentScale = contentScale,
                     modifier = Modifier
@@ -157,21 +216,21 @@ fun ImageWithChose(contentResolver: ContentResolver,
                                         ActivityResultContracts.PickVisualMedia.ImageOnly
                                     )
                                 )
-                                boolean = false
                             })
                         DropdownMenuItem(
                             text = { Text(text = stringResource(R.string.take_photo)) },
                             onClick = {
-                                /*TODO*/
-                                //cameraPickerActivity.launch(tempUri)
-                                boolean = false
+                                val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                                if (takePictureIntent.resolveActivity(context.packageManager) != null) {
+                                    cameraPickerActivity.launch(takePictureIntent)
+                                }
                             })
 
                     }
                 }
             }
         }
-        if (bitmap == null && editable) {
+        else if (editable) {
 
             Column (modifier = Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally){
                 Icon(Icons.Filled.Image, contentDescription = "image",modifier = Modifier.size(60.dp,60.dp), tint = Color.Gray)
@@ -181,12 +240,27 @@ fun ImageWithChose(contentResolver: ContentResolver,
                 DropdownMenu(expanded = boolean, onDismissRequest = { boolean = false }) {
                     DropdownMenuItem(text = { Text(text = stringResource(R.string.from_galery)) }, onClick = {
                         imagePickerActivity.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                        boolean = false
                     })
                     DropdownMenuItem(text = { Text(text = stringResource(R.string.take_photo)) }, onClick = {
                     /*TODO*/
-                        //cameraPickerActivity.launch(tempUri)
-                        boolean = false})
+                        val takePicIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                        if (takePicIntent.resolveActivity(context.packageManager) != null) {
+
+                            val tempFile = File.createTempFile(
+                                "JPEG_${System.currentTimeMillis()}}",
+                                ".jpg",
+                                context.getExternalFilesDir(null)
+                                )
+                            tempUri = FileProvider.getUriForFile(
+                                context,
+                                "${context.packageName}.fileprovider",
+                                tempFile
+                            )
+                            takePicIntent.putExtra(MediaStore.EXTRA_OUTPUT, tempUri)
+                            cameraPickerActivity.launch(takePicIntent)
+                        }
+                    }
+                    )
 
                 }
             }
@@ -196,7 +270,7 @@ fun ImageWithChose(contentResolver: ContentResolver,
 }
 
 @Composable
-fun NumberTextField(number: String,modifier: Modifier = Modifier,enabled: Boolean = true,  suffix: @Composable()(()->Unit)? = null,prefix: @Composable()(()->Unit)? = null, onValueChange:((it:String)->Unit)? = null, textStyle:TextStyle = MaterialTheme.typography.bodyLarge) {
+fun NumberTextField(number: String, modifier: Modifier = Modifier, enabled: Boolean = true, suffix: @Composable (()->Unit)? = null, prefix: @Composable (()->Unit)? = null, onValueChange:((it:String)->Unit)? = null, textStyle:TextStyle = MaterialTheme.typography.bodyLarge) {
     TextField(
         value = number,
         onValueChange = {
@@ -223,8 +297,8 @@ fun NumberTextField(number: String,modifier: Modifier = Modifier,enabled: Boolea
 
 
 @Composable
-fun DecimalTextField(number: String,modifier: Modifier = Modifier,enabled: Boolean = true,
-                     suffix: @Composable()(()->Unit)? = null, prefix: @Composable()(()->Unit)? = null,
+fun DecimalTextField(number: String, modifier: Modifier = Modifier, enabled: Boolean = true,
+                     suffix: @Composable (()->Unit)? = null, prefix: @Composable (()->Unit)? = null,
                      onValueChange:((it:String)->Unit)? = null,
                      textStyle:TextStyle = MaterialTheme.typography.bodyLarge) {
     TextField(
@@ -256,7 +330,7 @@ fun DecimalTextField(number: String,modifier: Modifier = Modifier,enabled: Boole
 @Composable
 private fun ImagePreview() {
     ChefsRecipiesTheme {
-        ImageWithChose(contentResolver = LocalContext.current.contentResolver,bitmap = null, onImgChose = {}, editable = true)
+        ImageWithChose(context = LocalContext.current, path = "" ,editable = true)
     }
 }
 

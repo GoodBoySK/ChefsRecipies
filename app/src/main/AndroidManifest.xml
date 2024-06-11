@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.fri.uniza.sk.michal.sovcik.chefsrecipies">
     <uses-feature android:name="android.hardware.camera.any" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
@@ -18,6 +19,17 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ChefsRecipies"
         tools:targetApi="31">
+
+        <provider
+            android:authorities="com.fri.uniza.sk.michal.sovcik.chefsrecipies.fileprovider"
+            android:name="androidx.core.content.FileProvider"
+            android:grantUriPermissions="true"
+            android:exported="false">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"
+                />
+        </provider>
 
         <activity
             android:name=".MainActivity"

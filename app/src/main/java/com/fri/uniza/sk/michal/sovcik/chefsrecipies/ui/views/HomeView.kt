@@ -16,6 +16,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.material3.*
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,28 +37,33 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.plus
 import androidx.graphics.shapes.RoundedPolygon
 import androidx.graphics.shapes.toPath
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.R
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.DishType
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.persistent.Recipe
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.AppDatabase
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.Views
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.UIModels.FilteredRecipes
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.offline.OfflineRecipeRepositary
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.models.transients.repositaries.preview.PreviewRecipeRepositary
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.theme.ChefsRecipiesTheme
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.viewmodels.HomeViewModel
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.viewmodels.HomeViewModelFactory
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 @Composable
 fun HomeView(modifier: Modifier = Modifier,
-             state: State<FilteredRecipes>,
-             navController: NavController
+             navController: NavController,
+             viewModel: HomeViewModel
 )
 {
     val colorSchee = MaterialTheme.colorScheme
-    val config = LocalConfiguration.current
-
+    val state = viewModel.recipesFilter.collectAsState()
     android.graphics.Color().plus(android.graphics.Color.valueOf(0f,0f,0f,-0.5f))
 
+    val context = LocalContext.current
 
     Box(modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         Canvas(modifier = Modifier.fillMaxSize()) {
@@ -87,7 +93,14 @@ fun HomeView(modifier: Modifier = Modifier,
                 Text(text = stringResource(pair.second), style = MaterialTheme.typography.titleLarge, modifier = Modifier)
                 LazyRow (modifierReusable){
                     items(pair.first){
-                        RecipeCard(recipe = it, modifier = modifierReusable,{ navController.navigate(Views.RECIPEDETAIL.name + "/" + it.id) })
+                        RecipeCard(
+                            recipe = it,
+                            modifier = modifierReusable,
+                            onClick = { navController.navigate(Views.RECIPEDETAIL.name + "/" + it.id) },
+                            onRemove = {
+                                viewModel.deleteRecipe(it, context)
+                            }
+                        )
                     }
                 }
             }
@@ -127,11 +140,21 @@ fun HomeViewPreview(){
             previewRecipeRepositary.insertRecipe(Recipe(0,"Makronky",DishType.Dezert,30,15,4f,"Anicka",""))
             }
     }
+
+    val viewModel =  viewModel<HomeViewModel>(factory = HomeViewModelFactory(
+        OfflineRecipeRepositary(
+            AppDatabase.getDatabase(LocalContext.current).recipeDao(),
+            AppDatabase.getDatabase(LocalContext.current).tagDao(),
+            AppDatabase.getDatabase(LocalContext.current).ingredientDao(),
+            AppDatabase.getDatabase(LocalContext.current).instructionDao()
+        )
+        )
+    )
     ChefsRecipiesTheme {
             val state = mutableStateOf(FilteredRecipes(mainDishRecipes = listOf(Recipe(0,"Main",DishType.MainDish,30,15,3f,"michal",""))))
         HomeView(
-            navController = NavController(LocalContext.current),modifier = Modifier,
-                state = state)
+            navController = NavController(LocalContext.current),modifier = Modifier,viewModel = viewModel
+                )
 
     }
 }

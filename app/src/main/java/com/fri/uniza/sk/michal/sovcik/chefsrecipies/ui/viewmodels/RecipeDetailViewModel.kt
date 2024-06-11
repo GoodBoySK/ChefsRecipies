@@ -46,7 +46,7 @@ class RecipeDetailViewModel(private val recipeRepositary: RecipeRepositary, priv
             runBlocking {
                 val newid =  recipeRepositary.insertRecipe(Recipe(autor = pref.data.firstOrNull()?.get(stringPreferencesKey("username")) ?: ""))
                 recipeRepositary.updateRecipe(Recipe(id = newid, name = "NewRecipe$newid"))
-                id = newid;
+                id = newid
                 _uiState.value = _uiState.value.copy(isEditable = true)
             }
 
@@ -161,14 +161,14 @@ class RecipeDetailViewModel(private val recipeRepositary: RecipeRepositary, priv
 
             Ingredients:
             """
-            ingredientsState.value.forEach {
-                text += "${it.name} ${it.amount} ${it.measuremnts}\n"
-            }
+        ingredientsState.value.forEach {
+            text += "${it.name} ${it.amount} ${it.measuremnts}\n"
+        }
 
 
-            text += "Instructions\n"
-            instructionState.value.forEach {
-                 text += "${it.orderNum }. ${it.text}\n ${if (it.toData().stopTime != 0f) it.stopTime else ""} ${if (it.toData().temperature != 0)it.temperature else ""}\n"
+        text += "Instructions\n"
+        instructionState.value.forEach {
+            text += "${it.orderNum }. ${it.text}\n ${if (it.toData().stopTime != 0f) it.stopTime else ""} ${if (it.toData().temperature != 0)it.temperature else ""}\n"
              
             
         }
@@ -295,14 +295,8 @@ class RecipeDetailViewModel(private val recipeRepositary: RecipeRepositary, priv
         file.renameTo(newFile)
     }
 
-    fun deleteFile(path:String)
-    {
-
-        val file = File(path)
-        file.delete()
-    }
     private var serviceInternt = Intent()
-    private var totalSeconds = 1;
+    private var totalSeconds = 1
     var _percState: MutableStateFlow<Float> = MutableStateFlow(0f)
     var percState: StateFlow<Float> = _percState.asStateFlow()
     var timerIngredienceIndex = MutableStateFlow(-1)

@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -15,19 +14,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.asComposePath
 import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.graphics.shapes.RoundedPolygon
 import androidx.graphics.shapes.toPath
+import com.fri.uniza.sk.michal.sovcik.chefsrecipies.R
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.theme.ChefsRecipiesTheme
 import com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.viewmodels.ImportViewModel
 
@@ -65,7 +64,7 @@ fun ImportView(modifier: Modifier = Modifier, viewModel: ImportViewModel = andro
         verticalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxSize()
     ) {
-        Text(text = "Import from web",
+        Text(text = stringResource(R.string.import_from_web),
             fontStyle = MaterialTheme.typography.displayMedium.fontStyle,
             fontSize = MaterialTheme.typography.displayMedium.fontSize,
             lineHeight = MaterialTheme.typography.displayMedium.lineHeight,
@@ -79,7 +78,7 @@ fun ImportView(modifier: Modifier = Modifier, viewModel: ImportViewModel = andro
             placeholder = {
 
                 Text(
-                    text = "Paste url of suported website",
+                    text = stringResource(R.string.paste_url_of_suported_website),
                     textAlign = TextAlign.Start,
                     color = Color.Gray
                 )
@@ -94,7 +93,7 @@ fun ImportView(modifier: Modifier = Modifier, viewModel: ImportViewModel = andro
             enabled = false
 
         ) {
-            Text(text = "Import")
+            Text(text = stringResource(R.string.import_text))
         }
     
     }

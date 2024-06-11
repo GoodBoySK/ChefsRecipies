@@ -4,7 +4,6 @@
 
 package com.fri.uniza.sk.michal.sovcik.chefsrecipies.ui.views
 
-import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -16,7 +15,6 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -107,15 +105,7 @@ enum class DetailViewParts {
     Instructions
 }
 
-fun makeText(text:String,pos:String ):AnnotatedString {
-    val sb = AnnotatedString.Builder()
-    sb.append(text)
-    sb.withStyle(ParagraphStyle(TextAlign.Right))
-    {
-        append(pos)
-    }
-    return sb.toAnnotatedString()
-}
+
 @ExperimentalFoundationApi
 @RequiresApi(Build.VERSION_CODES.P)
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
@@ -131,7 +121,7 @@ fun RecipeDetailView(modifier: Modifier = Modifier, viewModel: RecipeDetailViewM
 
     val recipePersistant by viewModel.recipePersistant.collectAsState()
 
-    val context = LocalContext.current;
+    val context = LocalContext.current
 
     Box {
         //Back FloatingButtpn
@@ -171,7 +161,7 @@ fun RecipeDetailView(modifier: Modifier = Modifier, viewModel: RecipeDetailViewM
                 ) {
                     Text(
                         modifier = Modifier.padding(20.dp, 0.dp),
-                        text = "Save",
+                        text = stringResource(R.string.save),
                         color = Color.Black
                     )
                 }
@@ -190,11 +180,13 @@ fun RecipeDetailView(modifier: Modifier = Modifier, viewModel: RecipeDetailViewM
                 Icon(Icons.Filled.MoreHoriz, contentDescription = "Back", tint = Color.DarkGray)
             }
             DropdownMenu(modifier = Modifier.zIndex(1f),expanded = uiState.menuShown, onDismissRequest = {viewModel.updateUIState(uiState.copy(menuShown = false))  }) {
-                DropdownMenuItem(enabled = true, modifier = Modifier, text = { Text(text = "Share", color = Color.Black) }, onClick = {
+                DropdownMenuItem(enabled = true, modifier = Modifier, text = { Text(text = stringResource(
+                    R.string.share
+                ), color = Color.Black) }, onClick = {
                     viewModel.updateUIState(uiState.copy(menuShown = false))
                     viewModel.share(context)
                  })
-                DropdownMenuItem(text = { Text(text = "Edit On/Off") }, onClick = {
+                DropdownMenuItem(text = { Text(text = stringResource(R.string.edit_on_off)) }, onClick = {
                     viewModel.updateUIState(uiState.copy(isEditable = !uiState.isEditable,menuShown = false))
                 })
             }
@@ -282,7 +274,7 @@ fun RecipeDetailView(modifier: Modifier = Modifier, viewModel: RecipeDetailViewM
                         if (uiState.isEditable) {
                             Button(onClick = { viewModel.addInstruction(InstructionDetail()) }) {
                                 Text(
-                                    text = "Add instruction...",
+                                    text = stringResource(R.string.add_instruction),
                                     fontStyle = FontStyle.Italic,
                                     )
                             }
@@ -379,7 +371,7 @@ private fun InstructionBox(
                 onValueChange = {
                                 viewModel.editInstruction(instruction.copy(temperature = it),index)
                 },
-                number = instruction.temperature.toString(),
+                number = instruction.temperature,
                 enabled = uiState.isEditable,
                 prefix = {
                     Icon(
@@ -432,7 +424,7 @@ private fun DetailViewIngredient(
         //First line
         Row {
             TextField(
-                value = recipe.time.toString(),
+                value = recipe.time,
                 onValueChange = {},
                 enabled = false,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -440,10 +432,10 @@ private fun DetailViewIngredient(
                     .padding(10.dp)
                     .weight(1f),
                 suffix = {
-                    Text(text = "min")
+                    Text(text = stringResource(R.string.min))
                 }
             )
-            TextField(value = recipe.portions.toString(),
+            TextField(value = recipe.portions,
                 onValueChange = {},
                 enabled = false,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -570,7 +562,7 @@ private fun DetailViewDetail(
                 .padding(3.dp)
             NumberTextField(number = recipe.time,
                 enabled = uiState.isEditable,
-                suffix = { Text(text = "min") },
+                suffix = { Text(text = stringResource(id = R.string.min)) },
                 modifier = modifier,
                 onValueChange = {
                     viewModel.editRecipe(recipe.copy(time = it))
@@ -578,7 +570,7 @@ private fun DetailViewDetail(
             )
             NumberTextField(number = recipe.portions,
                 enabled = uiState.isEditable,
-                suffix = { Text(text = "dishes") },
+                suffix = { Text(text = stringResource(R.string.dishes)) },
                 modifier = modifier,
                 onValueChange = {
                     viewModel.editRecipe(recipe.copy(portions = it))
@@ -601,7 +593,7 @@ private fun DetailViewDetail(
                 TextField(
                     value = recipe.dishType.name, onValueChange = {},
                     readOnly = true,
-                    placeholder = { Text("Dish type") },
+                    placeholder = { Text(stringResource(R.string.dish_type)) },
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = uiState.dishTypeShowed)
                     },
@@ -609,7 +601,7 @@ private fun DetailViewDetail(
 
                 )
                 ExposedDropdownMenu(
-                    expanded = uiState.dishTypeShowed,
+                    expanded = uiState.dishTypeShowed && uiState.isEditable,
                     onDismissRequest = { viewModel.updateUIState(uiState.copy(dishTypeShowed = false)) }) {
                     DishType.entries.forEach {
                         DropdownMenuItem(text = { Text(it.name) },
@@ -712,7 +704,7 @@ private fun DetailViewDetail(
             modifier = Modifier
                 .fillMaxSize()
                 .height(500.dp),
-            placeholder = { Text(text = "Recipe description...", color = Color.Black) },
+            placeholder = { Text(text = stringResource(R.string.recipe_description_placeholder), color = Color.Black) },
             enabled = uiState.isEditable
         )
 

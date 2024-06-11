@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.IBinder
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -28,13 +29,14 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.File
 
 
-class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredientRepositary: IngredientRepositary, val instructionRepositary: InstructionRepositary, private val navController: NavController, private var id: Long, val pref: DataStore<Preferences>, val context: Context) : ViewModel() {
+class RecipeDetailViewModel(private val recipeRepositary: RecipeRepositary, private val ingredientRepositary: IngredientRepositary, private val instructionRepositary: InstructionRepositary, private val navController: NavController, private var id: Long, private val pref: DataStore<Preferences>, val context: Context) : ViewModel() {
 
     private var _uiState = MutableStateFlow(DetailViewState(false,false,"",0))
     val uiState = _uiState.asStateFlow()
@@ -42,7 +44,7 @@ class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredie
         if (id == 0.toLong())
         {
             runBlocking {
-                val newid =  recipeRepositary.insertRecipe(Recipe())
+                val newid =  recipeRepositary.insertRecipe(Recipe(autor = pref.data.firstOrNull()?.get(stringPreferencesKey("username")) ?: ""))
                 recipeRepositary.updateRecipe(Recipe(id = newid, name = "NewRecipe$newid"))
                 id = newid;
                 _uiState.value = _uiState.value.copy(isEditable = true)
@@ -51,7 +53,7 @@ class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredie
         }
     }
 
-    val recipeFlow = recipeRepositary.getRecipe(id)
+    private val recipeFlow = recipeRepositary.getRecipe(id)
     val recipePersistant = recipeRepositary.getRecipe(id).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), Recipe())
     //Get data from database -> cast them to new object so new instance is created -> load it
     private var _recipeState = MutableStateFlow(RecipeDetail())
@@ -78,7 +80,7 @@ class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredie
     }
 
 
-    val instructionFlow = instructionRepositary.getInstructions(id)
+    private val instructionFlow = instructionRepositary.getInstructions(id)
     //Get data from database -> cast them to new object so new instance is created -> load it
     private var _instructionState = MutableStateFlow(emptyList<InstructionDetail>())
     val instructionState:StateFlow<List<InstructionDetail>> = _instructionState.asStateFlow()
@@ -141,9 +143,9 @@ class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredie
             copyTag.forEachIndexed { _, it ->
                 recipeRepositary.insertTag(it)
             }
-            _ingredientsState.value = emptyList()
-            _instructionState.value = emptyList()
-            _tagsState.value = emptyList()
+//            _ingredientsState.value = emptyList()
+//            _instructionState.value = emptyList()
+//            _tagsState.value = emptyList()
             recipeRepositary.updateRecipe(_recipeState.value.toData())
 
         }
@@ -158,17 +160,20 @@ class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredie
             ${recipeState.value.description}
 
             Ingredients:
-            ${ingredientsState.value.forEach {
-            "${it.name} ${it.amount} ${it.measuremnts}\n" }
+            """
+            ingredientsState.value.forEach {
+                text += "${it.name} ${it.amount} ${it.measuremnts}\n"
             }
-            Instructions
-            ${instructionState.value.forEach { 
-                "${it.orderNum }. ${it.text}\n ${if (it.toData().stopTime != 0f) it.stopTime else ""} ${if (it.toData().temperature != 0)it.temperature else ""}\n"
+
+
+            text += "Instructions\n"
+            instructionState.value.forEach {
+                 text += "${it.orderNum }. ${it.text}\n ${if (it.toData().stopTime != 0f) it.stopTime else ""} ${if (it.toData().temperature != 0)it.temperature else ""}\n"
              
             
-        }}
+        }
             
-        """.trimIndent()
+
 
 
         val shareIntent = Intent().apply {
@@ -196,17 +201,17 @@ class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredie
         }
     }
     fun addTag(tag: Tag) {
-        var list = tagState.value.toMutableList()
+        val list = tagState.value.toMutableList()
         list.add(tag.copy(recipeId = recipeState.value.id))
         _tagsState.value = list.toList()
         _uiState.value = _uiState.value.copy(newTagText = "")
     }
     fun removeTag(tag: Tag) {
-        var list = tagState.value.toMutableList()
+        val list = tagState.value.toMutableList()
         list.remove(tag)
         _tagsState.value = list.toList()
         viewModelScope.launch{
-            recipeRepositary.deleteTag(tag)
+            this@RecipeDetailViewModel.recipeRepositary.deleteTag(tag)
         }
 
     }
@@ -220,15 +225,15 @@ class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredie
     }
     fun editIngredients(ingredient: IngredientDetail, index:Int){
         if (uiState.value.isEditable) {
-            var list = ingredientsState.value.toMutableList()
-            list.set(index,ingredient)
+            val list = ingredientsState.value.toMutableList()
+            list[index] = ingredient
             _ingredientsState.value = list.toList()
         }
     }
     fun addIngredients(ingredient: IngredientDetail) {
         if (uiState.value.isEditable) {
-            var newIngre = ingredient.copy( recipeId = recipeState.value.id)
-            var list = ingredientsState.value.toMutableList()
+            val newIngre = ingredient.copy( recipeId = recipeState.value.id)
+            val list = ingredientsState.value.toMutableList()
             list.add(newIngre)
             _ingredientsState.value = list.toList()
 
@@ -236,7 +241,7 @@ class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredie
     }
     fun removeIngredients(ingredient: IngredientDetail) {
         if (uiState.value.isEditable) {
-            var list = ingredientsState.value.toMutableList()
+            val list = ingredientsState.value.toMutableList()
             list.remove(ingredient)
             _ingredientsState.value = list.toList()
             viewModelScope.launch{
@@ -249,8 +254,8 @@ class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredie
             var newInstruction = instruction.copy(recipeId = recipeState.value.id, orderNum = instructionState.value.size + 1)
             viewModelScope.launch{
                 val newId = instructionRepositary.insert(newInstruction.toData())
-                newInstruction = newInstruction.copy(id = newId);
-                var list = instructionState.value.toMutableList()
+                newInstruction = newInstruction.copy(id = newId)
+                val list = instructionState.value.toMutableList()
 
                 list.add(newInstruction)
                 _instructionState.value = list.toList()
@@ -263,17 +268,17 @@ class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredie
     }
     fun editInstruction(instruction: InstructionDetail,index: Int){
         if (uiState.value.isEditable) {
-            var list = instructionState.value.toMutableList()
-            list.set(index,instruction)
+            val list = instructionState.value.toMutableList()
+            list[index] = instruction
             _instructionState.value = list.toList()
         }
     }
     fun removeInstruction(instruction: InstructionDetail) {
         if (uiState.value.isEditable) {
-            var list = instructionState.value.toMutableList()
+            val list = instructionState.value.toMutableList()
             list.remove(instruction)
             list.forEachIndexed {index, instructionDetail ->
-                list.set(index, instructionDetail.copy(orderNum = index + 1))
+                list[index] = instructionDetail.copy(orderNum = index + 1)
             }
             _instructionState.value = list.toList()
             viewModelScope.launch {
@@ -283,27 +288,27 @@ class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredie
             }
         }
     }
-    fun renameFolder(path: String, newName: String)
+    private fun renameFolder(path: String, newName: String)
     {
-        var file = File(context.filesDir.path,path)
-        var newFile = File(context.filesDir.path,newName)
+        val file = File(context.filesDir.path,path)
+        val newFile = File(context.filesDir.path,newName)
         file.renameTo(newFile)
     }
 
     fun deleteFile(path:String)
     {
 
-        var file = File(path)
+        val file = File(path)
         file.delete()
     }
     private var serviceInternt = Intent()
     private var totalSeconds = 1;
     var _percState: MutableStateFlow<Float> = MutableStateFlow(0f)
     var percState: StateFlow<Float> = _percState.asStateFlow()
-    var timerIngredienceIndex = MutableStateFlow(-1);
+    var timerIngredienceIndex = MutableStateFlow(-1)
     var isTimerActive = MutableStateFlow(false)
     var minutes = 0
-    val connection = object : ServiceConnection
+    private val connection = object : ServiceConnection
     {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             val binder = service as StopwatchService.LocalBinder
@@ -344,7 +349,8 @@ class RecipeDetailViewModel(val recipeRepositary: RecipeRepositary, val ingredie
         isTimerActive.value = false
     }
 }
-class RecipeViewModelFactory(private val repository: RecipeRepositary, private val ingredientRepositary: IngredientRepositary,val instructionRepositary: InstructionRepositary ,private val navController: NavController,private val recipeId: Long,val context: Context, private val pref:DataStore<Preferences>) : ViewModelProvider.Factory {
+class RecipeViewModelFactory(private val repository: RecipeRepositary, private val ingredientRepositary: IngredientRepositary,
+                             private val instructionRepositary: InstructionRepositary, private val navController: NavController, private val recipeId: Long, val context: Context, private val pref:DataStore<Preferences>) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(RecipeDetailViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")

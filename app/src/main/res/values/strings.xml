@@ -8,10 +8,22 @@
     <string name="themeratureUnits">C</string>
     <string name="timeUnitShortcut">min</string>
     <string name="add_image">Add Image</string>
-    <string name="from_galery">From galery...</string>
-    <string name="take_photo">Take photo...</string>
+    <string name="from_galery">From galery…</string>
+    <string name="take_photo">Take photo…</string>
     <string name="delete">Delete</string>
-    <string name="addtext">AddText...</string>
-    <string name="add_ingredient">Add ingredient...</string>
+    <string name="addtext">AddText…</string>
+    <string name="add_ingredient">Add ingredient…</string>
     <string name="portions">portions</string>
+    <string name="import_from_web">Import from web</string>
+    <string name="paste_url_of_suported_website">Paste url of suported website</string>
+    <string name="import_text">Import</string>
+    <string name="add_instruction">Add instruction…</string>
+    <string name="edit_on_off">Edit On/Off</string>
+    <string name="share">Share</string>
+    <string name="save">Save</string>
+    <string name="min">min</string>
+    <string name="dishes">dishes</string>
+    <string name="dish_type">Dish type</string>
+    <string name="recipe_description_placeholder">Recipe description…</string>
+    <string name="search_placeholder">Search…</string>
 </resources>
